@@ -11,7 +11,7 @@ data:
 
 
     stBoaVinda db 'Selecione uma opcao: ', 0
-    stCadastro db '1) Cadastrar Nova Conta', 0
+    stCadastro db '1) Cadastrar Conta Nova', 0
     stBuscar db '2) Buscar Conta', 0
     stEditarConta db '3) Editar Conta', 0
     stDeletarConta db '4) Deletar Conta', 0
@@ -142,6 +142,10 @@ stoi:                ; mov si, string ; Coloca o resultado em ax
   .endloop1:
 ret
 
+Buscar0:
+
+ret
+
 printInterface:
     mov si, stBoaVinda
     call printString
@@ -171,6 +175,32 @@ ret
 
 Cadastrar:
 
+  push cx
+  push ax
+  mov cx, 0
+  mov si, banco 
+  
+  .loopi:
+    cmp cx, 4
+    je .done2
+    lodsb ;pode bugar 
+    dec si
+    sub al, 48
+    cmp al, 0
+    je .done
+    inc cx
+    add si, 35
+    jmp .loopi
+  .done:
+    pop cx
+    pop ax
+    ret
+
+  .done2:
+    pop cx
+    pop ax
+    mov si, -1
+    ret
 ret
 
 Buscar:
