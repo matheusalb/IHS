@@ -7,6 +7,8 @@ data:
     numderoDaConta times 2 db 0
     opcao times 4 db 0
     string times 101 db 0
+    banco times 176 db 0 
+
 
     stBoaVinda db 'Selecione uma opcao: ', 0
     stCadastro db '1) Cadastrar Nova Conta', 0
@@ -15,6 +17,9 @@ data:
     stDeletarConta db '4) Deletar Conta', 0
     stSair db '5) Sair', 0
     stAdeus db 'Ate logo!', 0
+
+    stDigiteConta db 'Digite o numero da conta a ser buscada: ', 0
+    stNotFound db 'Deu nao, boy!', 0  
     
 putchar:
     mov ah, 0x0e
@@ -169,7 +174,64 @@ Cadastrar:
 ret
 
 Buscar:
+  mov si, stDigiteConta
+  call printString
 
+  mov di, opcao
+  call gets 
+   
+  mov si, banco 
+
+  cmpsb
+  jne naoEOPrimeiro
+  dec si
+  call printConta
+  ret
+
+  .naoEOPrimeiro:
+    mov si, banco
+    mov di, opcao
+    add si, 35
+    cmpsb
+    jne .naoEOSegundo
+    dec si
+    call printConta
+    ret
+  
+  .naoEOSegundo:
+    mov si, banco
+    mov di, opcao
+    add si, 70
+    cmpsb
+    jne .naoEOTerceiro
+    dec si
+    call printConta
+    ret
+
+  .naoEOTerceiro:
+    mov si, banco
+    mov di, opcao
+    add si, 105
+    cmpsb
+    jne .naoEOQuarto
+    dec si
+    call printConta
+    ret
+  
+  .naoEOQuarto:
+    mov si, banco
+    mov di, opcao
+    add si, 35
+    cmpsb
+    jne .naoEOQuinto
+    dec si
+    call printConta
+    ret
+
+  .naoEOQuinto:
+    mov si, stNotFound
+    call printString
+    
 ret
 
 Editar: 
@@ -186,7 +248,7 @@ main:
     mov ds, ax
     mov es, ax
 
-    .loop:
+    .principal:
         xor ax, ax ;zerando registradores
         mov ds, ax
         mov es, ax
@@ -206,24 +268,28 @@ main:
         cmp ax, 1
         jne .naoCadastar
         call Cadastrar
+        jmp .principal
 
         .naoCadastar:
           cmp ax, 2
           jne .naoBuscar
           call Buscar
-        
+          jmp .principal
+
         .naoBuscar:
           cmp ax, 3
           jne .naoEditar
           call Editar
+          jmp .principal
         
         .naoEditar:
           cmp ax, 4
           jne .naoDeletar
           call Deletar
+          jmp .principal
 
         .naoDeletar:
           cmp ax, 5 ; Sair
-          jne .loop
+          jne .principal
           mov si, stAdeus
           call printString
