@@ -6,7 +6,7 @@ jmp 0x0000:start  ;far jump - seta cs para 0
 ;   cpf 12
 ;   n_conta 2 
 
-banco times 200 db 0 ; user = 20, 20 * user = 200
+banco times 176 db 0 ; user = 35, n_user = 5, 35 * 5 = 175 (+ 1 do \0)
 nome times 21 db 0; nome
 cpf times 12 db 0 ; cpf
 nconta times 2 db 0 ;
