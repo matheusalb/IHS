@@ -1,4 +1,3 @@
-
 compile:
 	nasm -f bin banco.asm -o banco.bin
 
