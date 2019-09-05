@@ -2,12 +2,18 @@ org 0x7e00
 jmp 0x0000:main
 
 data: 
-    nome times 22 db 0
-    cpf times 15 db 0
-    numderoDaConta times 2 db 0
     opcao times 4 db 0
     string times 101 db 0
-    banco times 176 db 0 
+
+    ; do outro arquivo 
+    banco times 195 db 0 ; calculo no comentario de cima
+
+    nome times 7 db "NOME:",0 
+    cpf times 6  db "CPF:",0 
+    nconta times 9 db "N_CONTA:",0
+    NOME_LEN equ 21
+    CPF_LEN equ 12
+    N_CONTA_LEN equ 2
 
 
     stBoaVinda db 'Selecione uma opcao: ', 0
@@ -17,10 +23,98 @@ data:
     stDeletarConta db '4) Deletar Conta', 0
     stSair db '5) Sair', 0
     stAdeus db 'Ate logo!', 0
+    stCheio db 'O bando de dados esta cheio', 0
+    stTeste db 'achou usuario e printou', 0
+    stBank db 'banco: ', 0
 
     stDigiteConta db 'Digite o numero da conta a ser buscada: ', 0
     stNotFound db 'Deu nao, boy!', 0  
+; -------------------------------------------------------    
+getString:
+	; escaneia e printa
+	call scan
+	call print
+
+	; apertou enter?
+	cmp al, 0x0d
+	je .done
+
+	; guarda na memoria
+	stosb
+
+	; chamada recursiva
+	jmp getString
+
+	; fim da função
+	.done:
+        cmp cx, bx ; se a string nao tiver 20 chars + enter
+        jne .completar ; completa com " " para manter tamanho fixo
+
+		; coloca line break
+		mov al, 13
+		stosb
+		mov al, 10
+		stosb
+
+        ret
+
+        .completar:
+            mov al, ' '
+            inc cx
+            stosb ; guarda na memoria
+            jmp .done
+
+
+scan:
+    inc cx
+	mov ah, 0
+	int 16h
+
+	ret
+
+
+print:
+	mov ah, 0xe	; chando o sistema de saída
+	int 10h		; printando oq estiver em al
+
+	ret
+
+
+debug:
+	mov al, 'd'
+	call print
+
+	ret
+
     
+lineBreak:
+	mov ax, 13 ; line feed
+	call print
+
+	mov ax, 10 ; carriage return
+	call print
+
+	ret
+;;-------------------------------------------
+
+printBanco: 
+  mov si, banco
+  push cx
+  mov cx, 0
+
+  .loopa:
+    cmp cx, 195
+    je .end
+    lodsb
+    mov ah, 0eh
+    int 10h
+    inc cx
+    jmp .loopa
+
+  .end:
+    pop cx
+ret
+
 putchar:
     mov ah, 0x0e
     int 10h
@@ -142,7 +236,33 @@ stoi:                ; mov si, string ; Coloca o resultado em ax
   .endloop1:
 ret
 
-Buscar0:
+BuscarVazio:
+  push cx
+  push ax
+  mov cx, 0
+  mov si, banco 
+  
+  .loopi:
+    cmp cx, 4
+    je .done2
+    lodsb ;pode bugar 
+    
+    dec si
+    cmp al, 0
+    je .done
+    inc cx
+    add si, 35
+    jmp .loopi
+  .done:
+    pop cx
+    pop ax
+    ret
+
+  .done2:
+    pop cx
+    pop ax
+    mov si, -1
+    ret
 
 ret
 
@@ -173,34 +293,50 @@ printInterface:
 
 ret
 
+printConta:
+  mov si, stTeste
+  call printString
+ret
+
 Cadastrar:
+  call BuscarVazio
+  cmp si, -1
+  je .full
 
-  push cx
-  push ax
-  mov cx, 0
-  mov si, banco 
-  
-  .loopi:
-    cmp cx, 4
-    je .done2
-    lodsb ;pode bugar 
-    dec si
-    sub al, 48
-    cmp al, 0
-    je .done
-    inc cx
-    add si, 35
-    jmp .loopi
-  .done:
-    pop cx
-    pop ax
-    ret
+  ; ====== escanear num conta ======
+    mov bx, N_CONTA_LEN
+	mov si, nconta
+	call printString ; printa "N_CONTA:" pro usuario
+    mov cx, 0 ; zera contador
+    call getString
+	call lineBreak 
+    ; ====== escanear nome ======
+    mov bx, NOME_LEN
+	mov si,nome
+	call printString ; printa "NOME:" 
+    mov cx, 0 ; zera contador
+    call getString
+   	call lineBreak 
+    ; ====== escanear cpf ======
+    mov bx, CPF_LEN
+	mov si,cpf
+	call printString ; printa "CPF:"
+    mov cx, 0 ; zera contador
+    call getString;
+	mov al, 0; fecha a string
+	stosb ; guarda na memoria
 
-  .done2:
-    pop cx
-    pop ax
-    mov si, -1
-    ret
+	call lineBreak 
+  jmp .end 
+
+  .full:
+    mov si, stCheio
+    call printString
+    call endl
+
+  .end:
+
+
 ret
 
 Buscar:
@@ -210,10 +346,9 @@ Buscar:
   mov di, opcao
   call gets 
    
-  mov si, banco 
-
+  mov si, banco
   cmpsb
-  jne naoEOPrimeiro
+  jne .naoEOPrimeiro
   dec si
   call printConta
   ret
@@ -251,7 +386,7 @@ Buscar:
   .naoEOQuarto:
     mov si, banco
     mov di, opcao
-    add si, 35
+    add si, 140
     cmpsb
     jne .naoEOQuinto
     dec si
@@ -286,6 +421,10 @@ main:
         mov cx, ax
         mov al, 0
         mov bl, 0
+
+        mov si, stBank
+        call printString
+        call printBanco
 
         call printInterface
 
