@@ -45,7 +45,8 @@ data:
   stCheio db 'O banco de dados esta cheio!', 13,0
   stBank db 'banco: ', 0
   stdCadastrar db 'Digite os dados do novo cadastro:',13,0
-  stDigiteConta db 'Digite o numero da conta a ser buscada: ', 0
+  stDigiteConta db 'Digite o numero da conta a ser buscada: ',0
+  stDigiteContaEdit db 'Digite o numero da conta a ser editar: ', 0
   stNotFound db 'Conta inexistente!', 0  
 
 ;============================================================================== CÓDIGOS BÁSICOS =============================================================================================
@@ -326,11 +327,59 @@ printConta:
 ret
 
 ; =================================================================================== CÓDIGOS DE EDITAR =====================================================================================
-Editar: 
+printBuscarEdit:
+  mov si, stDigiteContaEdit
+  call printString
 
+  mov di, opcao
+  call getString
 
+  call endl
 ret
 
+
+Editar: 
+
+  call printBuscarEdit
+  call Buscar
+  cmp si, 0
+  jne .achouContaEdit
+          
+  call notFound
+  call endl
+  ret
+
+
+  .achouContaEdit:
+
+    add di,4
+
+
+    ; ====== escanear nome ======
+    mov bx, NOME_LEN
+    push si
+    mov si,nome
+    call printString ; printa "NOME:"
+    pop si
+    mov cx, 0 ; zera contador
+    call getString
+    call endl
+    ; ====== escanear cpf ======
+    mov bx, CPF_LEN
+    push si
+    mov si,cpf
+    call printString ; printa "CPF:"
+    mov cx, 0 ; zera contador
+    pop si
+    call getString;
+    mov al, 0; fecha a string
+    stosb ; guarda na memoria
+
+    call endl
+
+    ret
+
+  
 ; =================================================================================== CÓDIGOS DE DELETAR ====================================================================================
 Deletar:
 
