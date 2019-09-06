@@ -12,14 +12,14 @@ data:
   ; fechar string = \0 (tamanho 1)
   ; endl = 2
   ;
-  ; nhttps://github.com/matheusalb/IHS_conta = 1 + endl = 3
-  ; nome = 20 + endl = 22
+  ; n_conta = 1 + endl + \0 = 4
+  ; nome = 20 + endl  + \0 = 23
   ; cpf = 11 + endl + \0 = 14
   ;
-  ; tamanho do usuario: user_len = n_conta + nome + cpf = 3 + 22 + 14 = 39
-  ; banco = user_len * n_user = 39 * 5 = 195 
+  ; tamanho do usuario: user_len = n_conta + nome + cpf = 4 + 23 + 14 = 41
+  ; banco = user_len * n_user = 41 * 5 = 205 
   ;
-  banco times 195 db 0 ; calculo no comentario de cima
+  banco times 206 db 0 ; calculo no comentario de cima
 
   nome db "NOME:",0 
   cpf db "CPF:",0 
@@ -29,26 +29,19 @@ data:
   CPF_LEN equ 11
   N_CONTA_LEN equ 1
 
-  std1 db "Achou no 1",0
-  std2 db "Achou no 2",0
-  std3 db "Achou no 3",0
-  std4 db "Achou no 4",0
-  std5 db "Achou no 5",0
-
   stBoaVinda db 'Selecione uma opcao: ', 0
   stCadastro db '1) Cadastrar Conta Nova', 0
   stBuscar db '2) Buscar Conta', 0
   stEditarConta db '3) Editar Conta', 0
   stDeletarConta db '4) Deletar Conta', 0
   stSair db '5) Sair', 0
-  stAdeus db 'Ate logo!', 0
-  stCheio db 'O banco de dados esta cheio!', 13,0
-  stBank db 'banco: ', 0
+  stAdeus db 'ATE LOGO!', 0
+  stCheio db 'BANCO CHEIO!',0
   stdCadastrar db 'Digite os dados do novo cadastro:',13,0
   stDigiteConta db 'Digite o numero da conta a ser buscada:',0
   stDigiteContaEdit db 'Digite o numero da conta a ser editada:', 0
   stDigiteContaDel db 'Digite o numero da conta a ser deletada:', 0
-  stNotFound db 'Conta inexistente!', 0  
+  stNotFound db 'CONTA INEXISTENTE!', 0  
 
 ;============================================================================== CÓDIGOS BÁSICOS =============================================================================================
 delchar:
@@ -181,6 +174,7 @@ cadastrar:
   .full:
     mov si, stCheio
     call printString
+    call endl
     ret 
 
 
@@ -250,7 +244,7 @@ Buscar:
   .naoEOPrimeiro:
     mov si, banco
     mov di, opcao
-    add si, 39
+    add si, 41
     cmpsb
     jne .naoEOSegundo
     dec si
@@ -260,7 +254,7 @@ Buscar:
   .naoEOSegundo:
     mov si, banco
     mov di, opcao
-    add si, 78
+    add si, 82
     cmpsb
     jne .naoEOTerceiro
     dec si
@@ -270,7 +264,7 @@ Buscar:
   .naoEOTerceiro:
     mov si, banco
     mov di, opcao
-    add si, 117
+    add si, 123
     cmpsb
     jne .naoEOQuarto
     dec si
@@ -280,7 +274,7 @@ Buscar:
   .naoEOQuarto:
     mov si, banco
     mov di, opcao
-    add si, 156
+    add si, 164
     cmpsb
     jne .naoEOQuinto
     dec si
@@ -408,7 +402,7 @@ Deletar:
     stosb
     add si,4
     xor cx,cx
-    
+
     mov bx, NOME_LEN
     call .loopCompletar
 
