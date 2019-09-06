@@ -39,7 +39,9 @@ start:
 	
 	mov di, banco 	; para escanear (stosb)
     call cadastrar
-
+	mov si, banco
+	call printString
+	
     jmp fim
 
 
@@ -113,7 +115,6 @@ printString:
 	je .done
 	jmp printString
 	.done:
-		;call lineBreak
 		ret
 
 
@@ -131,14 +132,7 @@ print:
 
 	ret
 
-
-debug:
-	mov al, 'd'
-	call print
-
-	ret
-
-    
+   
 lineBreak:
 	mov ax, 13 ; line feed
 	call print
@@ -150,6 +144,7 @@ lineBreak:
 
 
 fim:
+	
 
 times 510 - ($ - $$) db 0
 dw 0xaa55       ;assinatura de boot
