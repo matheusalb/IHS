@@ -2,7 +2,7 @@ org 0x7e00
 jmp 0x0000:start
 
 data: 
-  opcao times 4 db 0
+  opcao times 2 db 0
   string times 101 db 0
 
     
@@ -21,14 +21,19 @@ data:
   ;
   banco times 195 db 0 ; calculo no comentario de cima
 
-  nome times 7 db "NOME:",0 
-  cpf times 6  db "CPF:",0 
-  nconta times 9 db "N_CONTA:",0
+  nome db "NOME:",0 
+  cpf db "CPF:",0 
+  nconta db "N_CONTA:",0
 
   NOME_LEN equ 21
   CPF_LEN equ 12
   N_CONTA_LEN equ 2
 
+  std1 db "Achou no 1",0
+  std2 db "Achou no 2",0
+  std3 db "Achou no 3",0
+  std4 db "Achou no 4",0
+  std5 db "Achou no 5",0
 
   stBoaVinda db 'Selecione uma opcao: ', 0
   stCadastro db '1) Cadastrar Conta Nova', 0
@@ -37,10 +42,10 @@ data:
   stDeletarConta db '4) Deletar Conta', 0
   stSair db '5) Sair', 0
   stAdeus db 'Ate logo!', 0
-  stCheio db 'O bando de dados esta cheio', 0
+  stCheio db 'O banco de dados esta cheio', 0
   stTeste db 'achou usuario e printou', 0
   stBank db 'banco: ', 0
-
+  stdCadastrar db 'Novo Cadastro:',13,0
   stDigiteConta db 'Digite o numero da conta a ser buscada: ', 0
   stNotFound db 'Deu nao, boy!', 0  
 ; -------------------------------------------------------    
@@ -177,14 +182,14 @@ BuscarVazio:
   push cx
   push ax
   mov cx, 0
-  mov di, banco 
+  mov si, banco 
   
   .loopi:
     cmp cx, 4
     je .done2
     lodsb ;pode bugar 
     
-    dec di
+    dec si
     cmp al, 0
     je .done
     inc cx
@@ -193,12 +198,13 @@ BuscarVazio:
   .done:
     pop cx
     pop ax
+    mov di,si
     ret
 
   .done2:
     pop cx
     pop ax
-    mov di, -1
+    mov si, -1
     ret
 
 ret
@@ -231,69 +237,90 @@ printInterface:
 ret
 
 printConta:
-  mov si, stTeste
+  ;mov si, stTeste
   call printString
 ret
 
-
-
-Buscar:
+printBuscar:
   mov si, stDigiteConta
   call printString
 
   mov di, opcao
-  call gets 
-   
+  call gets
+  ret
+
+Buscar:
+  mov di, opcao
   mov si, banco
   cmpsb
   jne .naoEOPrimeiro
   dec si
+  push si
+  mov si,std1
   call printConta
+  pop si
+  mov di,si
   ret
 
   .naoEOPrimeiro:
     mov si, banco
     mov di, opcao
-    add si, 35
+    add si, 39
     cmpsb
     jne .naoEOSegundo
     dec si
+    push si
+    mov si, std2
     call printConta
+    pop si
+    mov di,si
     ret
   
   .naoEOSegundo:
     mov si, banco
     mov di, opcao
-    add si, 70
+    add si, 78
     cmpsb
     jne .naoEOTerceiro
     dec si
+    push si
+    mov si, std3
     call printConta
+    pop si
+    mov di,si
     ret
 
   .naoEOTerceiro:
     mov si, banco
     mov di, opcao
-    add si, 105
+    add si, 117
     cmpsb
     jne .naoEOQuarto
     dec si
+    push si
+    mov si, std4
     call printConta
+    pop si
+    mov di,si
     ret
   
   .naoEOQuarto:
     mov si, banco
     mov di, opcao
-    add si, 140
+    add si, 156
     cmpsb
     jne .naoEOQuinto
     dec si
+    push si
+    mov si, std5
     call printConta
+    pop si
+    mov di,si
     ret
 
   .naoEOQuinto:
-    mov si, stNotFound
-    call printString
+    call notFound
+    mov si, 0
     
 ret
 
@@ -312,26 +339,60 @@ start:
 	xor ax, ax	; zerar ax (xor com ele mesmo sempre dá 0)
 	mov ds, ax	; zerar o ds
 	mov es, ax	; zerar o es
-    mov bx, ax  ; bx assume valores do len da string para scanear
+  mov bx, ax  ; bx assume valores do len da string para scanear
 	mov ss, ax	; zerar o ss
 	mov sp, 0x7c00 ; carre
 
 	push ax ; coloca o ax (que é 0) na pilha
 	
 	mov di, banco 	; para escanear (stosb)
-  call cadastrar
-	mov si, banco
+  mov si, stdCadastrar
 	call printString
   call cadastrar
-  mov al, 0; fecha a string
-	stosb ; guarda na memoria
-	mov si, banco
+
+	mov si, stdCadastrar
 	call printString
+  call cadastrar
+
+  mov si, stdCadastrar
+	call printString
+  call cadastrar
+
+  mov si, stdCadastrar
+	call printString
+  call cadastrar
+
+  mov si, stdCadastrar
+	call printString
+  call cadastrar
+
+  mov si, stdCadastrar
+	call printString
+  call cadastrar
+
+  call printBuscar
+  call Buscar
+  call printBuscar
+  call Buscar
+  call printBuscar
+  call Buscar
+  call printBuscar
+  call Buscar
+  call printBuscar
+  call Buscar
+	;call printString
 	
-    jmp fim
+  jmp fim
 
 
 cadastrar:
+  mov di, opcao
+  mov al, 0
+  stosb
+  call Buscar
+  cmp si, 0
+  je notFound
+
 	; ====== escanear num conta ======
   mov bx, N_CONTA_LEN
 	mov si, nconta
@@ -352,11 +413,18 @@ cadastrar:
 	call printString ; printa "CPF:"
   mov cx, 0 ; zera contador
   call getString;
-	;mov al, 0; fecha a string
-	;stosb ; guarda na memoria
+	mov al, 0; fecha a string
+	stosb ; guarda na memoria
 
 	call lineBreak 
-    ret
+
+ 
+  ret
+
+notFound:
+  mov si, stNotFound
+  call printString
+  ret
 
 
 getString:
@@ -376,8 +444,8 @@ getString:
 
 	; fim da função
 	.done:
-        cmp cx, bx ; se a string nao tiver 20 chars + enter
-        jne .completar ; completa com " " para manter tamanho fixo
+    cmp cx, bx ; se a string nao tiver 20 chars + enter
+    jne .completar ; completa com " " para manter tamanho fixo
 
 		; coloca line break
 		mov al, 13
@@ -405,7 +473,7 @@ printString:
 
 
 scan:
-    inc cx
+  inc cx
 	mov ah, 0
 	int 16h
 
