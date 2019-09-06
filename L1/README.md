@@ -1,5 +1,5 @@
-# Snake10
-*Project of a bootloader for the discipline of software infrastructure at UFPE - Snake game in assembly x86*
+# Data Bank
+*Project for the discipline of Interface Hardware-Software at UFPE - a data bank in assembly x86*
 
 
 To build this code you need to have NASM and QEMU installed
