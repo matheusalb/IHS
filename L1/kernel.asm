@@ -10,11 +10,11 @@ data:
   ; numero de usuarios: n_user = 5
   ;
   ; fechar string = \0 (tamanho 1)
-  ; linebreak = 2
+  ; endl = 2
   ;
-  ; n_conta = 1 + linebreak = 3
-  ; nome = 20 + linebreak = 22
-  ; cpf = 11 + linebreak + \0 = 14
+  ; n_conta = 1 + endl = 3
+  ; nome = 20 + endl = 22
+  ; cpf = 11 + endl + \0 = 14
   ;
   ; tamanho do usuario: user_len = n_conta + nome + cpf = 3 + 22 + 14 = 39
   ; banco = user_len * n_user = 39 * 5 = 195 
@@ -25,9 +25,9 @@ data:
   cpf db "CPF:",0 
   nconta db "N_CONTA:",0
 
-  NOME_LEN equ 21
-  CPF_LEN equ 12
-  N_CONTA_LEN equ 2
+  NOME_LEN equ 20
+  CPF_LEN equ 11
+  N_CONTA_LEN equ 1
 
   std1 db "Achou no 1",0
   std2 db "Achou no 2",0
@@ -47,118 +47,55 @@ data:
   stdCadastrar db 'Digite os dados do novo cadastro:',13,0
   stDigiteConta db 'Digite o numero da conta a ser buscada: ', 0
   stNotFound db 'Conta inexistente!', 0  
-; -------------------------------------------------------    
-printBanco: 
-  mov si, banco
-  push cx
-  mov cx, 0
 
-  .loopa:
-    cmp cx, 195
-    je .end
-    lodsb
-    mov ah, 0eh
-    int 10h
-    inc cx
-    jmp .loopa
-
-  .end:
-    pop cx
+;============================================================================== CÓDIGOS BÁSICOS =============================================================================================
+delchar:
+  mov al, 0x08                    ; backspace
+  call print
+  mov al, ' '
+  call print
+  mov al, 0x08                    ; backspace
+  call print
 ret
 
-putchar:
-    mov ah, 0x0e
-    int 10h
-    ret
-getchar:
-    mov ah, 0x00
-    int 16h
-    ret
-delchar:
-    mov al, 0x08                    ; backspace
-    call putchar
-    mov al, ' '
-    call putchar
-    mov al, 0x08                    ; backspace
-    call putchar
-    ret
-endl:
-    mov al, 0x0a                    ; line feed
-    call putchar
-    mov al, 0x0d                    ; carriage return
-    call putchar
-    ret
-gets:                           ; mov di, string
-    xor cx, cx                  ; zerar contador
-    .loop1:
-        call getchar
-        cmp al, 0x08                ; backspace
-        je .backspace
-        cmp al, 0x0d                ; carriage return
-        je .done
-        cmp cl, 100             ; string limit checker
-        je .loop1
-        stosb
-        inc cl
-        call putchar
-       
-        jmp .loop1
-        .backspace:
-            cmp cl, 0           ; is empty?
-            je .loop1
-            dec di
-            dec cl
-            mov byte[di], 0
-            call delchar
-        jmp .loop1
-    .done:
-    mov al, 0
-    stosb
-    call endl
-    ret
-   
-reverse:              ; mov si, string
-  mov di, si
-  xor cx, cx          ; zerar contador
-  .loop1:             ; botar string na stack
-    lodsb
-    cmp al, 0
-    je .endloop1
-    inc cl
-    push ax
-    jmp .loop1
-  .endloop1:
-  .loop2:             ; remover string da stack        
-    pop ax
-    stosb
-    loop .loop2
-  ret
 
-tostring:              ; mov ax, int / mov di, string
-  push di
+endl:
+  mov al, 0x0a                    ; line feed
+  call print
+  mov al, 0x0d                    ; carriage return
+  call print
+ret
+
+
+gets:                           ; mov di, string
+  xor cx, cx                  ; zerar contador
   .loop1:
-    cmp ax, 0
-    je .endloop1
-    xor dx, dx
-    mov bx, 10
-    div bx            ; ax = 9999 -> ax = 999, dx = 9
-    xchg ax, dx       ; swap ax, dx
-    add ax, 48        ; 9 + '0' = '9'
-    stosb
-    xchg ax, dx
-    jmp .loop1
-  .endloop1:
-  pop si
-  cmp si, di
-  jne .done
-  mov al, 48
-  stosb
+      call scan
+      cmp al, 0x08                ; backspace
+      je .backspace
+      cmp al, 0x0d                ; carriage return
+      je .done
+      cmp cl, 100             ; string limit checker
+      je .loop1
+      stosb
+      inc cl
+      call print
+      
+      jmp .loop1
+      .backspace:
+          cmp cl, 0           ; is empty?
+          je .loop1
+          dec di
+          dec cl
+          mov byte[di], 0
+          call delchar
+      jmp .loop1
   .done:
   mov al, 0
   stosb
-  call reverse
+  call endl
 ret
-
+   
 stoi:                ; mov si, string ; Coloca o resultado em ax
   xor cx, cx
   xor ax, ax
@@ -177,187 +114,31 @@ stoi:                ; mov si, string ; Coloca o resultado em ax
   .endloop1:
 ret
 
-BuscarVazio:
-  push cx
-  push ax
-  mov cx, 0
-  mov si, banco 
-  
-  .loopi:
-    cmp cx, 4
-    je .done2
-    lodsb ;pode bugar 
-    
-    dec si
-    cmp al, 0
-    je .done
-    inc cx
-    add di, 35
-    jmp .loopi
-  .done:
-    pop cx
-    pop ax
-    mov di,si
-    ret
 
-  .done2:
-    pop cx
-    pop ax
-    mov si, -1
-    ret
-
-ret
-
-printInterface:
-    mov si, stBoaVinda
-    call printString
-    call endl
-
-    mov si, stCadastro
-    call printString
-    call endl
-
-    mov si, stBuscar
-    call printString
-    call endl
-
-    mov si, stEditarConta
-    call printString
-    call endl
-
-    mov si, stDeletarConta
-    call printString 
-    call endl
-
-    mov si, stSair
-    call printString
-    call endl
-
-ret
-
-printBuscar:
-  mov si, stDigiteConta
-  call printString
-
-  mov di, opcao
-  call gets
-  ret
-
-Buscar:
-  mov di, opcao
-  mov si, banco
-  cmpsb
-  jne .naoEOPrimeiro
-  dec si
-  ;push si
-  ;mov si,std1
-  ;call printConta
-  ;pop si
-  mov di,si
-  ret
-
-  .naoEOPrimeiro:
-    mov si, banco
-    mov di, opcao
-    add si, 39
-    cmpsb
-    jne .naoEOSegundo
-    dec si
-    ;push si
-    ;mov si, std2
-    ;call printConta
-    ;pop si
-    mov di,si
-    ret
-  
-  .naoEOSegundo:
-    mov si, banco
-    mov di, opcao
-    add si, 78
-    cmpsb
-    jne .naoEOTerceiro
-    dec si
-    ;push si
-    ;mov si, std3
-    ;call printConta
-    ;pop si
-    mov di,si
-    ret
-
-  .naoEOTerceiro:
-    mov si, banco
-    mov di, opcao
-    add si, 117
-    cmpsb
-    jne .naoEOQuarto
-    dec si
-    ;push si
-    ;mov si, std4
-    ;call printConta
-    ;pop si
-    mov di,si
-    ret
-  
-  .naoEOQuarto:
-    mov si, banco
-    mov di, opcao
-    add si, 156
-    cmpsb
-    jne .naoEOQuinto
-    dec si
-    ;push si
-    ;mov si, std5
-    ;call printConta
-    ;pop si
-    mov di,si
-    ret
-
-  .naoEOQuinto:
-    ;call notFound
-    mov si, 0
-    
+scan:
+	mov ah, 0
+	int 16h
 ret
 
 
-printConta:
-  ;============= print "N_CONTA: nconta"=============
-  push si
-  mov si,nconta
-  call printString
-  pop si
-  call printString
-  call lineBreak 
-
-  ;=============== print "NOME: nome" ===============  
-  inc si
-  push si
-  mov si,nome
-  call printString
-  pop si
-  call printString
-  call lineBreak 
-
-  ;================ print "CPF: cpf" ================
-  inc si
-  push si
-  mov si,cpf
-  call printString
-  pop si
-  call printString
-  call lineBreak 
-
-
-Editar: 
-
-
-ret
-
-Deletar:
-
+printString:
+	lodsb
+	call print
+	cmp al, 0
+	je .done
+  cmp al,13
+  je .done
+	jmp printString
+	.done:
 ret
 
 
-; =================================================================================== CÓDIGO DO CADASTRO  ===================================================================================
+print:
+	mov ah, 0xe	; chando o sistema de saída
+	int 10h		; printando oq estiver em al
+ret
+
+; =================================================================================== CÓDIGO DO CADASTRO ===================================================================================
 cadastrar:
   mov di, opcao
   mov al, 0
@@ -372,14 +153,16 @@ cadastrar:
 	call printString ; printa "N_CONTA:" pro usuario
   mov cx, 0 ; zera contador
   call getString
-	call lineBreak 
+	call endl 
+
   ; ====== escanear nome ======
   mov bx, NOME_LEN
 	mov si,nome
 	call printString ; printa "NOME:" 
   mov cx, 0 ; zera contador
   call getString
-  call lineBreak 
+  call endl 
+
   ; ====== escanear cpf ======
   mov bx, CPF_LEN
 	mov si,cpf
@@ -389,7 +172,7 @@ cadastrar:
 	mov al, 0; fecha a string
 	stosb ; guarda na memoria
 
-	call lineBreak 
+	call endl 
 
   .done:
     ret 
@@ -398,88 +181,192 @@ cadastrar:
     call printString
     ret 
 
+
+;Função para realizar o input para o CADASTRO -> corrige o tamanho
+getString:                 
+  xor cx, cx               ; zerar contador
+  .loop1:
+    call scan
+    cmp al, 0x08           ; backspace
+    je .backspace
+    cmp al, 0x0d           ; carriage return
+    je .done
+    cmp cl, bl             ; string limit checker
+    je .loop1
+    stosb
+    inc cl
+    call print
+    
+    jmp .loop1
+    .backspace:
+      cmp cl, 0           ; is empty?
+      je .loop1
+      dec di
+      dec cl
+      mov byte[di], 0
+      call delchar
+    jmp .loop1
+
+	.done:
+    inc bl
+    .loopCompletar:
+      cmp cl, bl ; se a string nao tiver 20 chars + enter
+      jne .completa ; completa com " " para manter tamanho fixo
+
+      ; coloca line break
+      mov al, 13
+      stosb
+      mov al, 10
+      stosb
+      ret
+
+      .completa:
+        mov al, ' '
+        inc cl
+        stosb ; guarda na memoria
+        jmp .loopCompletar
+
+; =================================================================================== CÓDIGOS DE BUSCAR =====================================================================================
+printBuscar:
+  mov si, stDigiteConta
+  call printString
+
+  mov di, opcao
+  call gets
+ret
+
+
+Buscar:
+  mov di, opcao
+  mov si, banco
+  cmpsb
+  jne .naoEOPrimeiro
+  dec si
+  mov di,si
+  ret
+
+  .naoEOPrimeiro:
+    mov si, banco
+    mov di, opcao
+    add si, 39
+    cmpsb
+    jne .naoEOSegundo
+    dec si
+    mov di,si
+    ret
+  
+  .naoEOSegundo:
+    mov si, banco
+    mov di, opcao
+    add si, 78
+    cmpsb
+    jne .naoEOTerceiro
+    dec si
+    mov di,si
+    ret
+
+  .naoEOTerceiro:
+    mov si, banco
+    mov di, opcao
+    add si, 117
+    cmpsb
+    jne .naoEOQuarto
+    dec si
+    mov di,si
+    ret
+  
+  .naoEOQuarto:
+    mov si, banco
+    mov di, opcao
+    add si, 156
+    cmpsb
+    jne .naoEOQuinto
+    dec si
+    mov di,si
+    ret
+
+  .naoEOQuinto:
+    mov si, 0
+    
+ret
+
+
 notFound:
   mov si, stNotFound
   call printString
-  ret
-
-
-
-
-getString:
-	; escaneia e printa
-	call scan
-	call print
-
-	; apertou enter?
-	cmp al, 0x0d
-	je .done
-
-	; guarda na memoria
-	stosb
-
-	; chamada recursiva
-	jmp getString
-
-	; fim da função
-	.done:
-    cmp cx, bx ; se a string nao tiver 20 chars + enter
-    jne .completar ; completa com " " para manter tamanho fixo
-
-		; coloca line break
-		mov al, 13
-		stosb
-		mov al, 10
-		stosb
-
-        ret
-
-        .completar:
-            mov al, ' '
-            inc cx
-            stosb ; guarda na memoria
-            jmp .done
-
-
-printString:
-	lodsb
-	call print
-	cmp al, 0
-	je .done
-  cmp al,13
-  je .done
-	jmp printString
-	.done:
-		ret
-
-
-scan:
-  inc cx
-	mov ah, 0
-	int 16h
-
-	ret
-
-
-print:
-	mov ah, 0xe	; chando o sistema de saída
-	int 10h		; printando oq estiver em al
-
-	ret
-
+ret
    
-lineBreak:
-	mov ax, 13 ; line feed
-	call print
 
-	mov ax, 10 ; carriage return
-	call print
+printConta:
+  ;============= print "N_CONTA: nconta"=============
+  push si
+  mov si,nconta
+  call printString
+  pop si
+  call printString
+  call endl 
 
-	ret
+  ;=============== print "NOME: nome" ===============  
+  inc si
+  push si
+  mov si,nome
+  call printString
+  pop si
+  call printString
+  call endl 
 
-	
- ;============================================================================ FIM CÓDIGO DO CADASTRO ===================================================================================================================
+  ;================ print "CPF: cpf" ================
+  inc si
+  push si
+  mov si,cpf
+  call printString
+  pop si
+  call printString
+  call endl 
+ret
 
+; =================================================================================== CÓDIGOS DE EDITAR =====================================================================================
+Editar: 
+
+
+ret
+
+; =================================================================================== CÓDIGOS DE DELETAR ====================================================================================
+Deletar:
+
+ret
+
+
+
+; =================================================================================== CÓDIGO INTERFACE ======================================================================================
+printInterface:
+  mov si, stBoaVinda
+  call printString
+  call endl
+
+  mov si, stCadastro
+  call printString
+  call endl
+
+  mov si, stBuscar
+  call printString
+  call endl
+
+  mov si, stEditarConta
+  call printString
+  call endl
+
+  mov si, stDeletarConta
+  call printString 
+  call endl
+
+  mov si, stSair
+  call printString
+  call endl
+
+ret
+
+ ;========================================================================================= MENU ============================================================================================
 main:
     xor ax, ax ;zerando registradores
     mov ds, ax
@@ -494,13 +381,9 @@ main:
         mov al, 0
         mov bl, 0
 
-        ;mov si, stBank
-        ;call printString
-        ;call printBanco
-
-        call lineBreak 
+        call endl 
         call printInterface
-        call lineBreak 
+        call endl 
 
         mov di, opcao
         call gets ;escreve em quem di aponta
@@ -522,7 +405,7 @@ main:
           jne .achouConta
           
           call notFound
-          call lineBreak
+          call endl
           jmp .principal
 
           .achouConta:
