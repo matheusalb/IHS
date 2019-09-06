@@ -12,7 +12,7 @@ data:
   ; fechar string = \0 (tamanho 1)
   ; endl = 2
   ;
-  ; n_conta = 1 + endl = 3
+  ; nhttps://github.com/matheusalb/IHS_conta = 1 + endl = 3
   ; nome = 20 + endl = 22
   ; cpf = 11 + endl + \0 = 14
   ;
@@ -45,8 +45,9 @@ data:
   stCheio db 'O banco de dados esta cheio!', 13,0
   stBank db 'banco: ', 0
   stdCadastrar db 'Digite os dados do novo cadastro:',13,0
-  stDigiteConta db 'Digite o numero da conta a ser buscada: ',0
-  stDigiteContaEdit db 'Digite o numero da conta a ser editar: ', 0
+  stDigiteConta db 'Digite o numero da conta a ser buscada:',0
+  stDigiteContaEdit db 'Digite o numero da conta a ser editada:', 0
+  stDigiteContaDel db 'Digite o numero da conta a ser deletada:', 0
   stNotFound db 'Conta inexistente!', 0  
 
 ;============================================================================== CÓDIGOS BÁSICOS =============================================================================================
@@ -381,7 +382,55 @@ Editar:
 
   
 ; =================================================================================== CÓDIGOS DE DELETAR ====================================================================================
+printBuscarDel:
+  mov si, stDigiteContaDel
+  call printString
+
+  mov di, opcao
+  call getString
+
+  call endl
+ret
+
+
 Deletar:
+  call printBuscarDel
+  call Buscar
+  cmp si, 0
+  jne .deleteConta
+          
+  call notFound
+  call endl
+  ret
+
+  .deleteConta:
+    mov al,0
+    stosb
+    add si,4
+    xor cx,cx
+    
+    mov bx, NOME_LEN
+    call .loopCompletar
+
+    xor cx,cx
+    mov bx, CPF_LEN
+
+    .loopCompletar:
+        cmp cl, bl ; se a string nao tiver 20 chars + enter
+        jne .completa ; completa com " " para manter tamanho fixo
+
+        ; coloca line break
+        mov al, 13
+        stosb
+        mov al, 10
+        stosb
+        ret
+
+        .completa:
+          mov al, ' '
+          inc cl
+          stosb ; guarda na memoria
+          jmp .loopCompletar
 
 ret
 
