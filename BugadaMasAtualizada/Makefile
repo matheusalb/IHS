@@ -7,7 +7,7 @@ boot2_pos = 1
 boot2_size = 1
 
 #kernel
-kernel_file = bancoDeDados
+kernel_file = kernel
 kernel_pos = 2
 kernel_size = 20
 

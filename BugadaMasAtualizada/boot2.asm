@@ -1,13 +1,8 @@
 org 0x500
 jmp 0x0000:start
 
-line1 db 'A Arcadio Buendia Production: ', 0
-line2 db 'Made by: drp,nss2 and mvca', 0
-line3 db 'Powered by: A Large Sum of Potatoes ', 0
-final db '          ', 0
-
 start:
-    mov bl, 15
+    mov bl, 12
     call clear
 
     xor ax, ax
@@ -38,47 +33,7 @@ clear:
     int 10h
 ret
 
-printLine:
-    
-    lodsb
-    cmp al, 0
-    je return
-
-    mov ah, 0xe
-    int 10h
-
-    mov dx, 200
-    call timing
-
-    jmp printLine
-
-
-
-
-
-
-
 return:
-ret
-
-timing:
-    mov bp, dx
-    uselessFor:
-    dec bp
-    nop
-    jnz uselessFor
-    dec dx
-    cmp dx, 0
-    jnz uselessFor
-ret
-
-newLine:
-    mov al, 10
-    mov ah, 0eh
-    int 10h
-    mov al, 13
-    mov ah, 0eh
-    int 10h
 ret
 
 reset:
