@@ -1,5 +1,5 @@
 org 0x7e00 
-jmp 0x0000:start
+jmp 0x0000:main
 
 data: 
   opcao times 2 db 0
@@ -42,12 +42,11 @@ data:
   stDeletarConta db '4) Deletar Conta', 0
   stSair db '5) Sair', 0
   stAdeus db 'Ate logo!', 0
-  stCheio db 'O banco de dados esta cheio', 0
-  stTeste db 'achou usuario e printou', 0
+  stCheio db 'O banco de dados esta cheio!', 13,0
   stBank db 'banco: ', 0
-  stdCadastrar db 'Novo Cadastro:',13,0
+  stdCadastrar db 'Digite os dados do novo cadastro:',13,0
   stDigiteConta db 'Digite o numero da conta a ser buscada: ', 0
-  stNotFound db 'Deu nao, boy!', 0  
+  stNotFound db 'Conta inexistente!', 0  
 ; -------------------------------------------------------    
 printBanco: 
   mov si, banco
@@ -236,11 +235,6 @@ printInterface:
 
 ret
 
-printConta:
-  ;mov si, stTeste
-  call printString
-ret
-
 printBuscar:
   mov si, stDigiteConta
   call printString
@@ -255,10 +249,10 @@ Buscar:
   cmpsb
   jne .naoEOPrimeiro
   dec si
-  push si
-  mov si,std1
-  call printConta
-  pop si
+  ;push si
+  ;mov si,std1
+  ;call printConta
+  ;pop si
   mov di,si
   ret
 
@@ -269,10 +263,10 @@ Buscar:
     cmpsb
     jne .naoEOSegundo
     dec si
-    push si
-    mov si, std2
-    call printConta
-    pop si
+    ;push si
+    ;mov si, std2
+    ;call printConta
+    ;pop si
     mov di,si
     ret
   
@@ -283,10 +277,10 @@ Buscar:
     cmpsb
     jne .naoEOTerceiro
     dec si
-    push si
-    mov si, std3
-    call printConta
-    pop si
+    ;push si
+    ;mov si, std3
+    ;call printConta
+    ;pop si
     mov di,si
     ret
 
@@ -297,10 +291,10 @@ Buscar:
     cmpsb
     jne .naoEOQuarto
     dec si
-    push si
-    mov si, std4
-    call printConta
-    pop si
+    ;push si
+    ;mov si, std4
+    ;call printConta
+    ;pop si
     mov di,si
     ret
   
@@ -311,18 +305,47 @@ Buscar:
     cmpsb
     jne .naoEOQuinto
     dec si
-    push si
-    mov si, std5
-    call printConta
-    pop si
+    ;push si
+    ;mov si, std5
+    ;call printConta
+    ;pop si
     mov di,si
     ret
 
   .naoEOQuinto:
-    call notFound
+    ;call notFound
     mov si, 0
     
 ret
+
+
+printConta:
+  ;============= print "N_CONTA: nconta"=============
+  push si
+  mov si,nconta
+  call printString
+  pop si
+  call printString
+  call lineBreak 
+
+  ;=============== print "NOME: nome" ===============  
+  inc si
+  push si
+  mov si,nome
+  call printString
+  pop si
+  call printString
+  call lineBreak 
+
+  ;================ print "CPF: cpf" ================
+  inc si
+  push si
+  mov si,cpf
+  call printString
+  pop si
+  call printString
+  call lineBreak 
+
 
 Editar: 
 
@@ -335,63 +358,13 @@ ret
 
 
 ; =================================================================================== CÓDIGO DO CADASTRO  ===================================================================================
-start:
-	xor ax, ax	; zerar ax (xor com ele mesmo sempre dá 0)
-	mov ds, ax	; zerar o ds
-	mov es, ax	; zerar o es
-  mov bx, ax  ; bx assume valores do len da string para scanear
-	mov ss, ax	; zerar o ss
-	mov sp, 0x7c00 ; carre
-
-	push ax ; coloca o ax (que é 0) na pilha
-	
-	mov di, banco 	; para escanear (stosb)
-  mov si, stdCadastrar
-	call printString
-  call cadastrar
-
-	mov si, stdCadastrar
-	call printString
-  call cadastrar
-
-  mov si, stdCadastrar
-	call printString
-  call cadastrar
-
-  mov si, stdCadastrar
-	call printString
-  call cadastrar
-
-  mov si, stdCadastrar
-	call printString
-  call cadastrar
-
-  mov si, stdCadastrar
-	call printString
-  call cadastrar
-
-  call printBuscar
-  call Buscar
-  call printBuscar
-  call Buscar
-  call printBuscar
-  call Buscar
-  call printBuscar
-  call Buscar
-  call printBuscar
-  call Buscar
-	;call printString
-	
-  jmp fim
-
-
 cadastrar:
   mov di, opcao
   mov al, 0
   stosb
   call Buscar
   cmp si, 0
-  je notFound
+  je .full
 
 	; ====== escanear num conta ======
   mov bx, N_CONTA_LEN
@@ -418,13 +391,19 @@ cadastrar:
 
 	call lineBreak 
 
- 
-  ret
+  .done:
+    ret 
+  .full:
+    mov si, stCheio
+    call printString
+    ret 
 
 notFound:
   mov si, stNotFound
   call printString
   ret
+
+
 
 
 getString:
@@ -467,6 +446,8 @@ printString:
 	call print
 	cmp al, 0
 	je .done
+  cmp al,13
+  je .done
 	jmp printString
 	.done:
 		ret
@@ -513,11 +494,13 @@ main:
         mov al, 0
         mov bl, 0
 
-        mov si, stBank
-        call printString
-        call printBanco
+        ;mov si, stBank
+        ;call printString
+        ;call printBanco
 
+        call lineBreak 
         call printInterface
+        call lineBreak 
 
         mov di, opcao
         call gets ;escreve em quem di aponta
@@ -533,8 +516,18 @@ main:
         .naoCadastar:
           cmp ax, 2
           jne .naoBuscar
+          call printBuscar
           call Buscar
+          cmp si, 0
+          jne .achouConta
+          
+          call notFound
+          call lineBreak
           jmp .principal
+
+          .achouConta:
+            call printConta
+            jmp .principal
 
         .naoBuscar:
           cmp ax, 3
@@ -553,6 +546,5 @@ main:
           jne .principal
           mov si, stAdeus
           call printString
-
 
 fim:
