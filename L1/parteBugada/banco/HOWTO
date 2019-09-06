@@ -1,9 +1,0 @@
-
-To run this game, first install the QEMU and NASM on the computer.
-
-Then, run the following command on the terminal in the same folder:
-
-make all
-
-Thanks for checking it out :)
-Lucas A
