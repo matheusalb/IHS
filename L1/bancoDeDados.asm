@@ -25,9 +25,9 @@ data:
   cpf db "CPF:",0 
   nconta db "N_CONTA:",0
 
-  NOME_LEN equ 20
-  CPF_LEN equ 11
-  N_CONTA_LEN equ 1
+  NOME_LEN equ 21
+  CPF_LEN equ 12
+  N_CONTA_LEN equ 2
 
   stBoaVinda db 'Selecione uma opcao: ', 0
   stCadastro db '1) Cadastrar Conta Nova', 0
@@ -357,6 +357,7 @@ Editar:
     call printString ; printa "NOME:"
     pop si
     mov cx, 0 ; zera contador
+    add di,1
     call getString
     call endl
     ; ====== escanear cpf ======
