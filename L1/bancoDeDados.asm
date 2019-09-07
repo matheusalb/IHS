@@ -25,9 +25,9 @@ data:
   cpf db "CPF:",0 
   nconta db "N_CONTA:",0
 
-  NOME_LEN equ 21
-  CPF_LEN equ 12
-  N_CONTA_LEN equ 2
+  NOME_LEN equ 20
+  CPF_LEN equ 11
+  N_CONTA_LEN equ 1
 
   stBoaVinda db 'Selecione uma opcao: ', 0
   stCadastro db '1) Cadastrar Conta Nova', 0
@@ -348,20 +348,22 @@ Editar:
   .achouContaEdit:
 
     add di,4
+    push di
 
 
     ; ====== escanear nome ======
-    mov bx, NOME_LEN
+    mov bl, NOME_LEN
     push si
     mov si,nome
     call printString ; printa "NOME:"
     pop si
-    mov cx, 0 ; zera contador
-    add di,1
+    mov cx, 0 ; zera contador]
+    pop di
     call getString
     call endl
     ; ====== escanear cpf ======
-    mov bx, CPF_LEN
+    mov bl, CPF_LEN
+    sub bl,1
     push si
     mov si,cpf
     call printString ; printa "CPF:"
@@ -370,6 +372,8 @@ Editar:
     call getString;
     mov al, 0; fecha a string
     stosb ; guarda na memoria
+
+
 
     call endl
 
