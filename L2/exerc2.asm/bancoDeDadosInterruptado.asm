@@ -463,24 +463,65 @@ printInterface:
 
 ret
 
+chooseFunction:
+
+  cmp ax, 1
+  jne .naoCadastar
+  call cadastrar
+  jmp .choose
+
+  .naoCadastar:
+    cmp ax, 2
+    jne .naoBuscar
+    call printBuscar
+    call Buscar
+    cmp si, 0
+    jne .achouConta
+            
+    call notFound
+    call endl
+    jmp .choose
+
+    .achouConta:
+      call printConta
+      jmp .choose
+
+      .naoBuscar:
+        cmp ax, 3
+        jne .naoEditar
+        call Editar
+        jmp .choose
+          
+        .naoEditar:
+          cmp ax, 4
+          jne .choose
+          call Deletar
+
+
+          jmp .choose
+  .choose:
+
+iret
+
+
+
+
+
+
+
+
+
+
+
  ;========================================================================================= MENU ============================================================================================
 main:
     xor ax, ax ;zerando registradores
     mov ds, ax
     mov es, ax
 
-    ;Putting 3 functions on interrupt vector table
-    mov di,100h                 
-    mov word[di],printInterface
-    mov word[di+2],0
-
-    mov di,104h
-    mov word[di],cadastrar
-    mov word[di+2],0
-
-    mov di,108h
-    mov word[di],printBuscar
-    mov word[di+2],0
+    mov di,80h                ; offset da interrupção 20h na IVT
+    mov word[di],chooseFunction   ; salvando IP
+    mov word[di+2],0           ; salvando CS
 
 
 
@@ -494,52 +535,31 @@ main:
         mov bl, 0
 
         call endl 
-        int 40h ; <<<<<<<<<<<<<============= Calling interrupt
+        call printInterface
         call endl 
 
         mov di, opcao
         call gets ;escreve em quem di aponta
 
         mov si, opcao
-        call stoi ;opcao em ax
+        call stoi ;opção em ax
 
-        cmp ax, 1
-        jne .naoCadastar
-        int 41h ; <<<<<<<<<<<<<============= Calling interrupt
-        jmp .principal
+        pusha ;Salva contexto 
 
-        .naoCadastar:
-          cmp ax, 2
-          jne .naoBuscar
-          int 42h ; <<<<<<<<<<<<<============= Calling interrupt
-          call Buscar
-          cmp si, 0
-          jne .achouConta
-          
-          call notFound
-          call endl
-          jmp .principal
+        int 20h ;Chama a interrupção
 
-          .achouConta:
-            call printConta
-            jmp .principal
+        popa ;Retorna o contexto
 
-        .naoBuscar:
-          cmp ax, 3
-          jne .naoEditar
-          call Editar
-          jmp .principal
         
-        .naoEditar:
-          cmp ax, 4
-          jne .naoDeletar
-          call Deletar
-          jmp .principal
+        cmp ax, 5 
+        jne .principal
+        mov si, stAdeus
+        call printString
 
-        .naoDeletar:
-          cmp ax, 5 ; Sair
-          jne .principal
-          mov si, stAdeus
-          call printString
+        jmp fim
+  
+
+
+
 
 fim:
