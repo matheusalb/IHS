@@ -469,7 +469,8 @@ main:
     mov ds, ax
     mov es, ax
 
-    mov di,100h                 ;Putting 3 functions on interrupt vector table
+    ;Putting 3 functions on interrupt vector table
+    mov di,100h                 
     mov word[di],printInterface
     mov word[di+2],0
 
@@ -493,7 +494,7 @@ main:
         mov bl, 0
 
         call endl 
-        int 40h ; <<<<<<<<<<<<<=============Calling interrupt
+        int 40h ; <<<<<<<<<<<<<============= Calling interrupt
         call endl 
 
         mov di, opcao
@@ -504,13 +505,13 @@ main:
 
         cmp ax, 1
         jne .naoCadastar
-        int 41h ; <<<<<<<<<<<<<=============Calling interrupt
+        int 41h ; <<<<<<<<<<<<<============= Calling interrupt
         jmp .principal
 
         .naoCadastar:
           cmp ax, 2
           jne .naoBuscar
-          int 42h ; <<<<<<<<<<<<<=============Calling interrupt
+          int 42h ; <<<<<<<<<<<<<============= Calling interrupt
           call Buscar
           cmp si, 0
           jne .achouConta
