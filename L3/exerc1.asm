@@ -33,7 +33,6 @@ CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
 
 
-
 kernel_start:
     mov ax, 0
     mov ss, ax
@@ -57,11 +56,25 @@ kernel_start:
     jmp CODE_SEG:b32
 
 
+
 [bits 32]
 VIDEO_MEMORY equ 0xb8000
 WHITE_ON_BLACK equ 0x0f
 
 string db 'Hello World', 0
+
+clear_screen:
+    pushad
+
+    cld
+    mov edi, 0xB8000
+    mov cx, 80 * 25
+    mov ah, 0x0F
+    mov al, ' '
+    rep stosw
+
+    popad
+    ret
 
 print32:
     pusha
@@ -89,6 +102,8 @@ b32:
 
     mov ebp, 0x2000
     mov esp, ebp
+
+    call clear_screen
 
     mov ebx, string
     call print32
