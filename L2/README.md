@@ -1,6 +1,6 @@
 # Interruptions
 
-This Folder contains 2 interruption exercises. The first one implements the int 40h interruption to print the string "AP2 de IHS" with some requirements. The second, takes the exercise in the L1 folder and implements 3 functions ("printInterface", "cadastrar" and "printBuscar") as an ISR located in position 20H of the IVT.
+This folder contains 2 interruption exercises. The first one implements interrupt int 40h which prints the string ** AP2 de IHS ** following some requirements. The second one performs the L1 folder exercise, implementing 3 of the functions (**printInterface**, **cadastrar** and **printBuscar**) as an ISR located at position 20H of IVT.
 
 To compile and execute the 1st exercise, run the following lines of code on shell:
 
