@@ -1,6 +1,6 @@
 extern printf
 section .data
-n: dq 1000000.0 ; Numero de iterações
+n: dq 10000000.0 ; Numero de iterações
 i: dq 0.0 ; variável iteratiba
 minusone: dq -1.0 ; -1, será bastante útil
 CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
@@ -78,10 +78,6 @@ loop1:
     fstp
 
 
-
-
-
-    
 
     fld qword[i]
     fld qword[n]  ; comparo i com n
