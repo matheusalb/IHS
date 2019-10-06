@@ -1,6 +1,6 @@
 extern printf
 section .data
-n: dq 7.0 ; Numero de iterações
+n: dq 1000000.0 ; Numero de iterações
 i: dq 0.0 ; variável iteratiba
 minusone: dq -1.0 ; -1, será bastante útil
 CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
@@ -27,30 +27,24 @@ loop1:
     fld qword[m2] ; pega o 2
     fld qword[i]
     fmulp st1,st0 ; st1+st0 ==    i * 2
-    fstp qword[termo]
-    fstp
-
-
-
-    fld qword[m1]
-    fld qword[termo]
-    fadd st0,st1   ;  sto+st1 ==   2*i +1 
-    fstp qword[termo]
-    fstp
 
 
 
 
     fld qword[m1]
-    fld qword[termo]
-    fdivp ; st0/st1 == 1 / i*2 + 1
-    fstp qword[termo]
-    fstp
+    faddp st1,st0   ;  sto+st1 ==   2*i +1 
+
+
+
+
+
+    fld qword[m1]
+    fdivrp ; st0/st1 == 1 / i*2 + 1
+
 
     	
 
 
-    fld qword[termo]
     fld qword[CurrentOp]
     fmulp          ; st0*st1 == (-1)^i * [1/(2*i +1)]
     fstp qword[termo]
@@ -72,6 +66,7 @@ loop1:
     faddp 
     fstp qword[resultado]  ;Soma o termo com o resultado
     fstp
+
 
 
 
@@ -102,6 +97,8 @@ push dword [resultado]				;em duas partes de 32 bits
 push dword str 					;empilhando endereco da string
 call printf
 add esp, 12
+
+
 
 
 
