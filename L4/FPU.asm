@@ -1,10 +1,10 @@
 extern printf
 section .data
-n: dq 3.0 ; Numero de iterações
+n: dq 7.0 ; Numero de iterações
 i: dq 0.0 ; variável iteratiba
 minusone: dq -1.0 ; -1, será bastante útil
 CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
-str: db 'Valor = %f', 10,0		;string para printf
+str: db 'Valor = %.12f', 10,0		;string para printf
 m1 dq 1.0 ; 1
 m2 dq 2.0 ; 2
 resultado dq 0.0 ; resultado final
@@ -28,6 +28,7 @@ loop1:
     fld qword[i]
     fmulp st1,st0 ; st1+st0 ==    i * 2
     fstp qword[termo]
+    fstp
 
 
 
@@ -35,6 +36,7 @@ loop1:
     fld qword[termo]
     fadd st0,st1   ;  sto+st1 ==   2*i +1 
     fstp qword[termo]
+    fstp
 
 
 
@@ -43,6 +45,7 @@ loop1:
     fld qword[termo]
     fdivp ; st0/st1 == 1 / i*2 + 1
     fstp qword[termo]
+    fstp
 
     	
 
@@ -51,6 +54,7 @@ loop1:
     fld qword[CurrentOp]
     fmulp          ; st0*st1 == (-1)^i * [1/(2*i +1)]
     fstp qword[termo]
+    fstp
 
     
 
@@ -60,12 +64,14 @@ loop1:
     fld qword[minusone]
     fmulp
     fstp qword[CurrentOp]  ; (-1)^(i+1) == (-1)*(-1)^i
+    fstp
 
 
     fld qword[termo]
     fld qword[resultado]
     faddp 
     fstp qword[resultado]  ;Soma o termo com o resultado
+    fstp
 
 
 
@@ -74,6 +80,7 @@ loop1:
     fld qword[m1]  ;adiciono em 1 o i
     faddp
     fstp qword[i]
+    fstp
 
 
 
