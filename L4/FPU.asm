@@ -1,168 +1,106 @@
-[bits 16]
-[org 0x7c00]
-    
-    jmp 0x0000:kernel_start
-
-gdt_start:
-gdt_null:
-    dd 0x0
-    dd 0x0
-
-gdt_code:
-    dw 0xffff
-    dw 0x0
-    db 0x0
-    db 10011010b
-    db 11001111b
-    db 0x0
-
-gdt_data:
-    dw 0xffff
-    dw 0x0
-    db 0x0
-    db 10010010b
-    db 11001111b
-    db 0x0
-
-gdt_end:
-gdt_descriptor:
-    dw gdt_end - gdt_start
-    dd gdt_start
-
-CODE_SEG equ gdt_code - gdt_start
-DATA_SEG equ gdt_data - gdt_start
-
-
-kernel_start:
-    mov ax, 0
-    mov ss, ax
-    mov sp, 0xFFFC
-
-    mov ax, 0
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-
-    cli                     ; Limpa a flag de interrupção
-    lgdt[gdt_descriptor]    ; Carrega na tabela global de descritores (gdtr aponta para o limite da GDT e seu endereço base)
-    
-    ; Coloca 1 no bit PE do reg CRO 
-    mov eax, cr0            
-    or eax, 0x1
-    mov cr0, eax
-
-    ; Realiza o far jump
-    jmp CODE_SEG:b32
-
-; MODO PROTEGIDO A PARTIR DAQUI
-[bits 32]
-VIDEO_MEMORY equ 0xb8000
-WHITE_ON_BLACK equ 0x0f
-
+extern printf
 section .data
-    n dq 7.0 ; altera-se
-    m1 dq 1.0
-    resultado dq 0.0
-    m2 dq 2.0
-    str: db 'Valor = %f', 10,0        ;string para printf
-section .bss
-    memoriaResultado resq 1
-
+n: dq 3.0 ; Numero de iterações
+i: dq 0.0 ; variável iteratiba
+minusone: dq -1.0 ; -1, será bastante útil
+CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
+str: db 'Valor = %f', 10,0		;string para printf
+m1 dq 1.0 ; 1
+m2 dq 2.0 ; 2
+resultado dq 0.0 ; resultado final
+termo dq 0.0 ; o termo
 
 section .text
-global b32
+global main
 
-clear_screen:
-    pushad
+main:
 
-    cld
-    mov edi, 0xB8000
-    mov cx, 80 * 25
-    mov ah, 0x0F
-    mov al, ' '
-    rep stosw
 
-    popad
-    ret
+fld qword[n] ; carrego o n
+fld qword[m1] ; carrego o 1
+faddp 
+fstp qword[n] ; carrego o resultado para ser n + 1
 
-print32:
-    pusha
-    mov edx, VIDEO_MEMORY
-.loop:
-    mov al, [ebx]
-    mov ah, WHITE_ON_BLACK
-    cmp al, 0
-    je .done
-    mov [edx], ax
-    add ebx, 1
-    add edx, 2
-    jmp .loop
-.done:
-    popa
-    ret
 
-b32:
-    mov ax, DATA_SEG
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov ss, ax
-    mov ebp, 0x2000
-    mov esp, ebp
+loop1:
 
-    mov ecx, 7
+    fld qword[m2] ; pega o 2
+    fld qword[i]
+    fmulp st1,st0 ; st1+st0 ==    i * 2
+    fstp qword[termo]
 
-    .loopa:
-    fld qword[m2]
-    fld qword[n]
-    fmulp st1, st0 ; n * 2
+
 
     fld qword[m1]
-    faddp st1, st0 ; n*2 + 1
+    fld qword[termo]
+    fadd st0,st1   ;  sto+st1 ==   2*i +1 
+    fstp qword[termo]
+
+
+
 
     fld qword[m1]
-    fdivrp st1, st0 ; st0/st1 == 1 / n*2 + 1
+    fld qword[termo]
+    fdivp ; st0/st1 == 1 / i*2 + 1
+    fstp qword[termo]
 
-    fld qword[resultado] ; st0 == resultado, st1 == 1 / n*2 + 1
-
-    ; Mod 2
-    push edx 
-    push eax
-    push ebx 
-    mov ebx, 0
-    mov edx, 0
-    mov eax, 0
-    mov eax, ecx
-    mov ebx, 2
-    div ebx ; resto em edx
-
-    cmp edx, 0
-    je .soma
-
-    .subtrai:
-        fsubp st0, st1 ; resultado - fracao
-    jmp .terminasoma
-    .soma:
-        faddp st0, st1 ;
-    .terminasoma:
-        fstp qword[memoriaResultado]
-        mov resultado, qword[memoriaResultado]  
+    	
 
 
-        push dword [resultado+4]            ;empilhando o valor double
-        push dword [resultado]                ;em duas partes de 32 bits
-        push dword str                     ;empilhando endereco da string
-        call printf                        ;chamada de printf, que irá utilizar os valores empilhados
+    fld qword[termo]
+    fld qword[CurrentOp]
+    fmulp          ; st0*st1 == (-1)^i * [1/(2*i +1)]
+    fstp qword[termo]
 
-
-    loop .loopa
     
 
 
 
-    jmp $
+    fld qword[CurrentOp]
+    fld qword[minusone]
+    fmulp
+    fstp qword[CurrentOp]  ; (-1)^(i+1) == (-1)*(-1)^i
 
-[SECTION signature start=0x7dfe]
-dw 0AA55h
+
+    fld qword[termo]
+    fld qword[resultado]
+    faddp 
+    fstp qword[resultado]  ;Soma o termo com o resultado
+
+
+
+
+    fld qword[i]
+    fld qword[m1]  ;adiciono em 1 o i
+    faddp
+    fstp qword[i]
+
+
+
+
+
+    
+
+    fld qword[i]
+    fld qword[n]  ; comparo i com n
+    fcomip
+    je exit1
+
+jmp loop1
+
+exit1:
+
+push dword [resultado+4]			;empilhando o valor double
+push dword [resultado]				;em duas partes de 32 bits
+push dword str 					;empilhando endereco da string
+call printf
+add esp, 12
+
+
+
+
+
+FIM:
+MOV EAX, 1 ; exit syscall
+MOV EBX, 0 ; program return
+INT 80H ; syscall interruption
