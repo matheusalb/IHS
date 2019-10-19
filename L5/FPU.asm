@@ -1,6 +1,6 @@
 extern printf
 section .data
-n: dq 100.0 ; Numero de iterações
+n: dq 500.0 ; Numero de iterações
 i: dq 0.0 ; variável iteratiba
 minusone: dq -1.0 ; -1, será bastante útil
 CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
@@ -20,24 +20,11 @@ global main
 
 main:
 
-;; div
-;;  1
-;;  inc div inc div
-;;  fld[div]
-
-
-;; div
-;; 3!
-;; st0 * (st0+1)
-;; st0 * (st0+1)
-;; fld[div]
-
-
 
 fld qword[n] ; carrego o n
 fld qword[m1] ; carrego o 1
-faddp 
-fstp qword[n] ; carrego o resultado para ser n + 1
+faddp ; st0 = n+1
+fstp qword[n] ; n := st0
 fstp
 
 fld qword[x]
@@ -56,7 +43,7 @@ loop1:
     fld qword[i] 
     fld qword[m2] 
     fmulp ; st0 = 2*i
-    fstp qword[divisor] ; divisor = sst0
+    fstp qword[divisor] ; divisor = st0
     fstp
 
     
@@ -66,8 +53,8 @@ loop1:
 
     fld qword[divisor]
     fld qword[m1]
-    faddp st1,st0   ;  sto+st1 ==   2*i +1
-    fstp qword[divisor]
+    faddp st1,st0   ; faz st0 = st0 +st1 com sto+st1 ==   2*i +1 e st1 
+    fstp qword[divisor] ; divisor = st0
     fstp
 
     
@@ -79,14 +66,14 @@ loop1:
     fstp
 
     fld qword[divisor]
-    fstp qword[fat]
+    fstp qword[fat] ; fat = divisor
 
 
 
     fld qword[seq_i]
     fld qword[m2]
     faddp ; st0 = i+1
-    fstp qword[seq_i]
+    fstp qword[seq_i] ;seq_i = st0
     fstp
 
     
@@ -94,15 +81,15 @@ loop1:
     fld qword[seq_i]
     fld qword[fat]
     fmulp ; st0 = fat*(i+1) 
-    fstp qword[fat]
+    fstp qword[fat] ; fat = st0
     fstp 
 
     
 
     fld qword[divisor]
     fld qword[m1]
-    fdivrp ; st0/st1 == 1 / (i*2 + 1)!]
-    fstp qword[divisor]
+    fdivrp ;temos st0 = st0/st1 com st0/st1 == 1 / (i*2 + 1)!]
+    fstp qword[divisor] ; divisor = st0
     fstp
 
 
@@ -111,8 +98,8 @@ loop1:
 
     fld qword[divisor]
     fld qword[CurrentOp]
-    fmulp          ; st0*st1 == (-1)^i * [1/(2*i +1)!]
-    fstp qword[termo]
+    fmulp;      temos st0 = st0*st1 com st0*st1 == (-1)^i * [1/(2*i +1)!]
+    fstp qword[termo] ;termo = st0
     fstp
 
     
@@ -121,14 +108,13 @@ loop1:
 
     fld qword[CurrentOp]
     fld qword[minusone]
-    fmulp
-    fstp qword[CurrentOp]  ; (-1)^(i+1) == (-1)*(-1)^i
-    fstp
+    fmulp ; temos st0 = st0*st1 com st0* st1 == (-1)^(i+1) == (-1)*(-1)^i
+    fstp qword[CurrentOp]  ;CurrentOp = st0
 
     fld qword[xpot]
-    fld qword[termo] ; xpot * (-1)^i * [1/(2*i +1)!]
-    fmulp
-    fstp qword[termo]
+    fld qword[termo] 
+    fmulp ;st0 = st0*st1 com st0*st1 == xpot * (-1)^i * [1/(2*i +1)!]
+    fstp qword[termo] ; termo = st0
     fstp
 
 
@@ -138,7 +124,7 @@ loop1:
 
     fld qword[termo]
     fld qword[resultado]
-    faddp 
+    faddp  ;st0 = st0 +st1 com st0+st1 = termo+resultado
     fstp qword[resultado]  ;Soma o termo com o resultado
     fstp
 
@@ -161,7 +147,8 @@ loop1:
 
     fld qword[i]
     fld qword[n]  ; comparo i com n
-    fcomip
+    fcomip ; e coloco no EFLAGS
+
     je exit1
 
 jmp loop1
@@ -174,6 +161,11 @@ exit1:
     push dword str                  ;empilhando endereco da string
     call printf
     add esp, 12
+
+    fld qword[resultado] ; carrego o resultado na FPU
+
+
+
     jmp FIM
 
 
