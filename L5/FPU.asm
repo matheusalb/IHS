@@ -7,28 +7,50 @@ section .data
 	minusone: dq -1.0 ; -1, será bastante útil
 	CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
 
-	str: db 'Valor = %.12f', 10,0       ;string para printf
+	str: db 'Valor = %.12f', 10,0	;string para printf
 
 	m1 dq 1.0 ; 1
 	m2 dq 2.0 ; 2
 
+
+
+	; Modificando agora
+
 	varPrint dq 0.0
 
-	resultadoReal dq 0.0
+	x dq 90.0
+	erro dq 0.000002
 
-	resultado dq 0.0 ; resultado final
-	termo dq 0.0 ; o termo
+	resultadoReal dq 0.0
+	resultadoCalc dq 0.0
+
+	; Auxiliares
 
 	paraRad dq 180.0
 	tratOver dq 360.0
 
-	x dq 90.0
+
+
+
+
+	resultado dq 0.0 ; resultado final
+	termo dq 0.0 ; o termo
+
+
+
+
+
+
 	xsq dq 0.0
 	xpot dq 0.0
 	fat dq 1.0
 
 	seq_i dq 0.0
 	divisor dq -1.0
+
+
+
+
 
 section .text
 global main
@@ -43,6 +65,8 @@ printar:
 
 main:
 
+	xor ax, ax ; Zera o ax, será usado como contador
+
 	; TRATAMENTO OVERFLOW
 	fld qword[tratOver]	; st0 := 360
 	fld qword[x] ; st0 := parâmetro
@@ -55,19 +79,23 @@ main:
 	fdiv qword[paraRad] ; st0 := pi/180 (Ângulo em Rad)
 	; Parâmetro em radianos na ST(0)
 
-	fst qword[varPrint] ; Debuggar
-
-
+	; ===============================
+	; CHECKPOINT 1 - Valor Convertido
+	; fst qword[varPrint] ; Debuggar
+	; call printar
+	; ===============================
 
 	fst qword[x] ; Armazena x já convertido para radianos
 
 	fsin ; Calcula sin(x)
-	fst qword[resultadoReal] ;Coloca em resultadoReal
+	
+	; ======================================
+	; CHECKPOINT 2 - Seno Calculado com fsin
+	; fst qword[varPrint]
+	; call printar
+	; ======================================
 
-
-
-
-
+	fstp qword[resultadoReal] ; Coloca o seno em resultadoReal
 
 
 
@@ -166,11 +194,19 @@ loop1:
     fstp qword[xpot] ; xpot = st0
     fstp
 
-    fld qword[i]
-    fld qword[n]  ; comparo i com n
-    fcomip ; e coloco no EFLAGS
+    fld qword[resultado]
+    fld qword[resultadoReal]
+    fsubp
+    fabs
 
-    je exit1
+    fld qword[erro]
+    fcomip
+
+    fstp
+    fstp
+
+    inc ax ; Incrementa contador de iterações
+    jae exit1 ;	Jump if Above or Equal
 
 jmp loop1
 
@@ -187,7 +223,8 @@ exit1:
 
     jmp FIM
 
+
 FIM:
-MOV EAX, 1 ; exit syscall
-MOV EBX, 0 ; program return
-INT 80H ; syscall interruption
+	mov eax, 1 ; exit syscall
+	mov ebx, 0 ; program return
+	int 80H ; syscall interruption

@@ -1,41 +1,91 @@
 extern printf
 section .data
-n: dq 100.0 ; Numero de iterações
-i: dq 0.0 ; variável iteratiba
-minusone: dq -1.0 ; -1, será bastante útil
-CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
-str: db 'Valor = %.12f', 10,0       ;string para printf
-m1 dq 1.0 ; 1
-m2 dq 2.0 ; 2
-resultado dq 0.0 ; resultado final
-termo dq 0.0 ; o termo
-x dq 3.14
-xsq dq 0.0
-xpot dq 0.0
-fat dq 1.0
-seq_i dq 0.0
-divisor dq -1.0
+
+    n: dq 100.0 ; Numero de iterações
+    i: dq 0.0 ; variável iterativa
+
+    minusone: dq -1.0 ; -1, será bastante útil
+    CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
+
+    str: db 'Valor = %.12f', 10,0       ;string para printf
+
+    m1 dq 1.0 ; 1
+    m2 dq 2.0 ; 2
+
+    varPrint dq 0.0
+
+    resultadoReal dq 0.0
+
+    resultado dq 0.0 ; resultado final
+    termo dq 0.0 ; o termo
+
+    paraRad dq 180.0
+    tratOver dq 360.0
+
+    x dq 90.0
+    xsq dq 0.0
+    xpot dq 0.0
+    fat dq 1.0
+
+    seq_i dq 0.0
+    divisor dq -1.0
+
 section .text
 global main
 
+printar:
+    push dword [varPrint+4]            ;empilhando o valor double
+    push dword [varPrint]              ;em duas partes de 32 bits
+    push dword str                  ;empilhando endereco da string
+    call printf
+    add esp, 12
+    ret
+
 main:
 
-
-fld qword[n] ; carrego o n
-fld qword[m1] ; carrego o 1
-faddp ; st0 = n+1
-fstp qword[n] ; n := st0
-fstp
-
-fld qword[x]
-fstp qword[xpot] ;;Coloca x em xpot
+    ; TRATAMENTO OVERFLOW
+    fld qword[tratOver] ; st0 := 360
+    fld qword[x] ; st0 := parâmetro
+    fprem ; st0 := parâmetro%360.0
 
 
-fld qword[x]
-fld qword[x]
-fmulp ; x*x
-fstp qword[xsq] ; Faz xsq = x*x
-fstp
+    ; CONVERSÃO PARA RADIANOS
+    fldpi ; st0 := pi
+    fmul ; st0 := pi*st1
+    fdiv qword[paraRad] ; st0 := pi/180 (Ângulo em Rad)
+    ; Parâmetro em radianos na ST(0)
+
+    fst qword[varPrint] ; Debuggar
+
+    fst qword[x] ; Armazena x já convertido para radianos
+
+    fsin ; Calcula sin(x)
+    fst qword[resultadoReal] ;Coloca em resultadoReal
+
+
+
+
+
+
+
+
+
+    fld qword[n] ; carrego o n
+    fld qword[m1] ; carrego o 1
+    faddp ; st0 = n+1
+    fstp qword[n] ; n := st0
+    fstp
+
+    fld qword[x]
+    fstp qword[xpot] ;;Coloca x em xpot
+
+    fld qword[x]
+    fld qword[x]
+    fmulp ; x*x
+    fstp qword[xsq] ; Faz xsq = x*x
+    fstp
+
+
 
 
 loop1:
@@ -46,18 +96,11 @@ loop1:
     fstp qword[divisor] ; divisor = st0
     fstp
 
-    
-
-
-
-
     fld qword[divisor]
     fld qword[m1]
     faddp st1,st0   ; faz st0 = st0 +st1 com sto+st1 ==   2*i +1 e st1 
     fstp qword[divisor] ; divisor = st0
     fstp
-
-    
 
     fld qword[divisor]
     fld qword[fat]
@@ -68,43 +111,29 @@ loop1:
     fld qword[divisor]
     fstp qword[fat] ; fat = divisor
 
-
-
     fld qword[seq_i]
     fld qword[m2]
     faddp ; st0 = i+1
     fstp qword[seq_i] ;seq_i = st0
     fstp
 
-    
-    
     fld qword[seq_i]
     fld qword[fat]
     fmulp ; st0 = fat*(i+1) 
     fstp qword[fat] ; fat = st0
     fstp 
 
-    
-
     fld qword[divisor]
     fld qword[m1]
     fdivrp ;temos st0 = st0/st1 com st0/st1 == 1 / (i*2 + 1)!]
     fstp qword[divisor] ; divisor = st0
-    fstp
-
-
-
-        
+    fstp        
 
     fld qword[divisor]
     fld qword[CurrentOp]
     fmulp;      temos st0 = st0*st1 com st0*st1 == (-1)^i * [1/(2*i +1)!]
     fstp qword[termo] ;termo = st0
     fstp
-
-    
-
-
 
     fld qword[CurrentOp]
     fld qword[minusone]
@@ -117,19 +146,11 @@ loop1:
     fstp qword[termo] ; termo = st0
     fstp
 
-
-
-
-
-
     fld qword[termo]
     fld qword[resultado]
     faddp  ;st0 = st0 +st1 com st0+st1 = termo+resultado
     fstp qword[resultado]  ;Soma o termo com o resultado
     fstp
-
-
-
 
     fld qword[i]
     fld qword[m1]  
@@ -137,13 +158,11 @@ loop1:
     fstp qword[i]
     fstp
 
-
     fld qword[xpot]
     fld qword[xsq] 
     fmulp  ; st0 = xpot * x^2
     fstp qword[xpot] ; xpot = st0
     fstp
-
 
     fld qword[i]
     fld qword[n]  ; comparo i com n
@@ -155,24 +174,16 @@ jmp loop1
 
 exit1:
 
-
     push dword [resultado+4]            ;empilhando o valor double
     push dword [resultado]              ;em duas partes de 32 bits
     push dword str                  ;empilhando endereco da string
+
     call printf
     add esp, 12
 
     fld qword[resultado] ; carrego o resultado na FPU
 
-
-
     jmp FIM
-
-
-
-
-
-
 
 FIM:
 MOV EAX, 1 ; exit syscall
