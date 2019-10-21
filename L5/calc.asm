@@ -1,62 +1,40 @@
 extern printf
 section .data
 
-	n: dq 100.0 ; Numero de iterações
-	i: dq 0.0 ; variável iterativa
+    n: dq 100.0 ; Numero de iterações
+    i: dq 0.0 ; variável iterativa
 
-	minusone: dq -1.0 ; -1, será bastante útil
-	CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
+    minusone: dq -1.0 ; -1, será bastante útil
+    CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
 
-	str: db 'Valor = %.12f', 10,0	;string para printf
+    str: db 'Valor = %.12f', 10,0       ;string para printf
 
-	m1 dq 1.0 ; 1
-	m2 dq 2.0 ; 2
+    m1 dq 1.0 ; 1
+    m2 dq 2.0 ; 2
 
+    varPrint dq 0.0
 
+    resultadoReal dq 0.0
 
-	; Modificando agora
+    resultado dq 0.0 ; resultado final
+    termo dq 0.0 ; o termo
 
-	varPrint dq 0.0
+    paraRad dq 180.0
+    tratOver dq 360.0
 
-	x dq 90.0
-	erro dq 0.000002
+    x dq 90.0
+    xsq dq 0.0
+    xpot dq 0.0
+    fat dq 1.0
 
-	resultadoReal dq 0.0
-	resultadoCalc dq 0.0
-
-	; Auxiliares
-
-	paraRad dq 180.0
-	tratOver dq 360.0
-
-
-
-
-
-	resultado dq 0.0 ; resultado final
-	termo dq 0.0 ; o termo
-
-
-
-
-
-
-	xsq dq 0.0
-	xpot dq 0.0
-	fat dq 1.0
-
-	seq_i dq 0.0
-	divisor dq -1.0
-
-
-
-
+    seq_i dq 0.0
+    divisor dq -1.0
 
 section .text
 global main
 
 printar:
-	push dword [varPrint+4]            ;empilhando o valor double
+    push dword [varPrint+4]            ;empilhando o valor double
     push dword [varPrint]              ;em duas partes de 32 bits
     push dword str                  ;empilhando endereco da string
     call printf
@@ -65,55 +43,47 @@ printar:
 
 main:
 
-	xor ax, ax ; Zera o ax, será usado como contador
-
-	; TRATAMENTO OVERFLOW
-	fld qword[tratOver]	; st0 := 360
-	fld qword[x] ; st0 := parâmetro
-	fprem ; st0 := parâmetro%360.0
+    ; TRATAMENTO OVERFLOW
+    fld qword[tratOver] ; st0 := 360
+    fld qword[x] ; st0 := parâmetro
+    fprem ; st0 := parâmetro%360.0
 
 
-	; CONVERSÃO PARA RADIANOS
-	fldpi ; st0 := pi
-	fmul ; st0 := pi*st1
-	fdiv qword[paraRad] ; st0 := pi/180 (Ângulo em Rad)
-	; Parâmetro em radianos na ST(0)
+    ; CONVERSÃO PARA RADIANOS
+    fldpi ; st0 := pi
+    fmul ; st0 := pi*st1
+    fdiv qword[paraRad] ; st0 := pi/180 (Ângulo em Rad)
+    ; Parâmetro em radianos na ST(0)
 
-	; ===============================
-	; CHECKPOINT 1 - Valor Convertido
-	; fst qword[varPrint] ; Debuggar
-	; call printar
-	; ===============================
+    fst qword[varPrint] ; Debuggar
 
-	fst qword[x] ; Armazena x já convertido para radianos
+    fst qword[x] ; Armazena x já convertido para radianos
 
-	fsin ; Calcula sin(x)
-	
-	; ======================================
-	; CHECKPOINT 2 - Seno Calculado com fsin
-	; fst qword[varPrint]
-	; call printar
-	; ======================================
-
-	fstp qword[resultadoReal] ; Coloca o seno em resultadoReal
+    fsin ; Calcula sin(x)
+    fst qword[resultadoReal] ;Coloca em resultadoReal
 
 
 
 
-	fld qword[n] ; carrego o n
-	fld qword[m1] ; carrego o 1
-	faddp ; st0 = n+1
-	fstp qword[n] ; n := st0
-	fstp
 
-	fld qword[x]
-	fstp qword[xpot] ;;Coloca x em xpot
 
-	fld qword[x]
-	fld qword[x]
-	fmulp ; x*x
-	fstp qword[xsq] ; Faz xsq = x*x
-	fstp
+
+
+
+    fld qword[n] ; carrego o n
+    fld qword[m1] ; carrego o 1
+    faddp ; st0 = n+1
+    fstp qword[n] ; n := st0
+    fstp
+
+    fld qword[x]
+    fstp qword[xpot] ;;Coloca x em xpot
+
+    fld qword[x]
+    fld qword[x]
+    fmulp ; x*x
+    fstp qword[xsq] ; Faz xsq = x*x
+    fstp
 
 
 
@@ -194,19 +164,11 @@ loop1:
     fstp qword[xpot] ; xpot = st0
     fstp
 
-    fld qword[resultado]
-    fld qword[resultadoReal]
-    fsubp
-    fabs
+    fld qword[i]
+    fld qword[n]  ; comparo i com n
+    fcomip ; e coloco no EFLAGS
 
-    fld qword[erro]
-    fcomip
-
-    fstp
-    fstp
-
-    inc ax ; Incrementa contador de iterações
-    jae exit1 ;	Jump if Above or Equal
+    je exit1
 
 jmp loop1
 
@@ -223,8 +185,7 @@ exit1:
 
     jmp FIM
 
-
 FIM:
-	mov eax, 1 ; exit syscall
-	mov ebx, 0 ; program return
-	int 80H ; syscall interruption
+MOV EAX, 1 ; exit syscall
+MOV EBX, 0 ; program return
+INT 80H ; syscall interruption
