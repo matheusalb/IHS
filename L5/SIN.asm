@@ -1,4 +1,3 @@
-extern printf
 section .data
  
     str: db 'Valor = %.12f', 10,0   ;string para printf
@@ -25,21 +24,29 @@ section .data
  
  
 section .text
-global main
- 
-printar:
-    push dword [varPrint+4]            ;empilhando o valor double
-    push dword [varPrint]              ;em duas partes de 32 bits
-    push dword str                  ;empilhando endereco da string
-    call printf
-    add esp, 12
-    ret
+global Sin
  
  
-main:
+ 
+Sin:
+
+    enter 0,0 ; Reajusta, salva ebp na pilha
+    finit
+
+    fld qword[ebp+8]
+    fstp qword[x] ;Coloca da pilha para o x
+
+    fld qword[ebp+12]
+    fstp qword[erro] ;Coloca da pilha para o erro
+
+
+
+
  
     xor eax, eax ; Zera o ax, será usado como contador
     inc ax ; Iteração Inicial
+
+    
  
  
     ; TRATAMENTO OVERFLOW: Ângulo truncado para 360
@@ -123,15 +130,11 @@ loopIter:
  
  
 exit1:
+
+    mov ecx,[ebp +12]
+    fst qword[ecx]; Armazena em x o valor certo
  
-    fld qword[resultadoCalc]
-    fstp qword[varPrint]
-    call printar
+
+    leave ;Desfaz o que o enter faz
+    ret
  
-    jmp FIM
- 
- 
-FIM:
-    mov eax, 1 ; exit syscall
-    mov ebx, 0 ; program return
-    int 80h ; syscall interruption

@@ -8,16 +8,17 @@ float convertAng (int x){
     return (PI*x)/180;    
 }
 
+extern void Sin(double,double,double*);
 int main (){
-    int x, e, numIter=0;
-    float angRad, val = 0;
+    int  numIter=0;
+    double x,e,val=0;
 
     printf("Digite o ângulo, em graus, e a diferença máxima:");
-    scanf("%d %d", &x, &e);
+    scanf("%lf %lf", &x, &e);
 
-    angRad = convertAng(x);
 
-    // val = sin(angRad,e,&numIter);
+
+    Sin(x,e,&val);
 
     printf("Val = %f, NumIter = %d",val,numIter);
     return 0;

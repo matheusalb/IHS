@@ -1,2 +1,2 @@
 run:
-	nasm -f elf FPU.asm && gcc -m32 -o FPU FPU.o && ./FPU
+	nasm -f elf64 SIN.asm && gcc -o programa main.c SIN.o && ./programa
