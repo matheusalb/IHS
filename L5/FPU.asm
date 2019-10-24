@@ -1,230 +1,137 @@
 extern printf
 section .data
-
-	n: dq 100.0 ; Numero de iterações
-	i: dq 0.0 ; variável iterativa
-
-	minusone: dq -1.0 ; -1, será bastante útil
-	CurrentOp: dq 1.0 ; Operação atual, determina se irá somar ou subtrair
-
-	str: db 'Valor = %.12f', 10,0	;string para printf
-
-	m1 dq 1.0 ; 1
-	m2 dq 2.0 ; 2
-
-
-
-	; Modificando agora
-
-	varPrint dq 0.0
-
-	x dq 90.0
-	erro dq 0.000002
-
-	resultadoReal dq 0.0
-	resultadoCalc dq 0.0
-
-	; Auxiliares
-
-	paraRad dq 180.0
-	tratOver dq 360.0
-
-
-
-
-
-	resultado dq 0.0 ; resultado final
-	termo dq 0.0 ; o termo
-
-
-
-
-
-
-	xsq dq 0.0
-	xpot dq 0.0
-	fat dq 1.0
-
-	seq_i dq 0.0
-	divisor dq -1.0
-
-
-
-
-
+ 
+    str: db 'Valor = %.12f', 10,0   ;string para printf
+ 
+    ; Auxiliar Debug
+    varPrint dq 0.0
+ 
+    ; Parâmetros
+    x dq 90.0
+    erro dq 0.000002
+ 
+    ; Auxiliar comparador
+    resultadoReal dq 0.0
+    resultadoCalc dq 0.0
+ 
+    ; Auxiliares conversão
+    paraRad dq 180.0
+    tratOver dq 360.0
+ 
+    ; Cálculo dos termos
+    fatorMult dq 1.0
+    fatorNum dq 0.0
+    indice dw 1
+ 
+ 
 section .text
 global main
-
+ 
 printar:
-	push dword [varPrint+4]            ;empilhando o valor double
+    push dword [varPrint+4]            ;empilhando o valor double
     push dword [varPrint]              ;em duas partes de 32 bits
     push dword str                  ;empilhando endereco da string
     call printf
     add esp, 12
     ret
-
+ 
+ 
 main:
+ 
+    xor eax, eax ; Zera o ax, será usado como contador
+    inc ax ; Iteração Inicial
+ 
+ 
+    ; TRATAMENTO OVERFLOW: Ângulo truncado para 360
+    fld qword[tratOver] ; st0 := 360
+    fld qword[x] ; st0 := parâmetro
+    fprem ; st0 := parâmetro%360.0
+ 
+ 
+    ; CONVERSÃO PARA RADIANOS: Multiplicar por 2pi/360
+    fldpi ; st0 := pi
+    fmul ; st0 := pi*st1
+    fdiv qword[paraRad] ; st0 := pi/180 (Ângulo em Rad)
+    ; Parâmetro em radianos na ST(0)
+ 
+ 
+    ; INICIALIZAÇÃO PARÂMETROS: fatorMult e resultadoCalc
+    fst qword[fatorMult]        ; Inicialização fator multiplicativo
+    fst qword[resultadoCalc]    ; Iteração inicial
+    fst qword[x]                ; Armazena x já convertido para radianos
+ 
+ 
+    ; ENCONTRAR VALOR FUNÇÃO
+    fsin                        ; Calcula sin(x)
+    fstp qword[resultadoReal]   ; Coloca o seno em resultadoReal
+ 
+ 
+    ; INICIALIZAÇÃO PARÂMETROS 2: fatorNum
+    fld qword[x]                ; Carrega angulo
+    fmul qword[x]               ; st0 := angulo*angulo
+    fchs                        ; st0 := -(angulo*angulo)
+    fstp qword[fatorNum]
+ 
+ 
+    mov eax,0 ; Inicializa eax como 0
 
-	xor ax, ax ; Zera o ax, será usado como contador
+loopIter:
 
-	; TRATAMENTO OVERFLOW
-	fld qword[tratOver]	; st0 := 360
-	fld qword[x] ; st0 := parâmetro
-	fprem ; st0 := parâmetro%360.0
+    inc eax ;incrementa eax
 
-
-	; CONVERSÃO PARA RADIANOS
-	fldpi ; st0 := pi
-	fmul ; st0 := pi*st1
-	fdiv qword[paraRad] ; st0 := pi/180 (Ângulo em Rad)
-	; Parâmetro em radianos na ST(0)
-
-	; ===============================
-	; CHECKPOINT 1 - Valor Convertido
-	; fst qword[varPrint] ; Debuggar
-	; call printar
-	; ===============================
-
-	fst qword[x] ; Armazena x já convertido para radianos
-
-	fsin ; Calcula sin(x)
-	
-	; ======================================
-	; CHECKPOINT 2 - Seno Calculado com fsin
-	; fst qword[varPrint]
-	; call printar
-	; ======================================
-
-	fstp qword[resultadoReal] ; Coloca o seno em resultadoReal
-
-
-
-
-	fld qword[n] ; carrego o n
-	fld qword[m1] ; carrego o 1
-	faddp ; st0 = n+1
-	fstp qword[n] ; n := st0
-	fstp
-
-	fld qword[x]
-	fstp qword[xpot] ;;Coloca x em xpot
-
-	fld qword[x]
-	fld qword[x]
-	fmulp ; x*x
-	fstp qword[xsq] ; Faz xsq = x*x
-	fstp
-
-
-
-
-loop1:
-
-    fld qword[i] 
-    fld qword[m2] 
-    fmulp ; st0 = 2*i
-    fstp qword[divisor] ; divisor = st0
-    fstp
-
-    fld qword[divisor]
-    fld qword[m1]
-    faddp st1,st0   ; faz st0 = st0 +st1 com sto+st1 ==   2*i +1 e st1 
-    fstp qword[divisor] ; divisor = st0
-    fstp
-
-    fld qword[divisor]
-    fld qword[fat]
-    fmulp ; st0 = fat*divisor
-    fstp qword[divisor] ;divisor = st0
-    fstp
-
-    fld qword[divisor]
-    fstp qword[fat] ; fat = divisor
-
-    fld qword[seq_i]
-    fld qword[m2]
-    faddp ; st0 = i+1
-    fstp qword[seq_i] ;seq_i = st0
-    fstp
-
-    fld qword[seq_i]
-    fld qword[fat]
-    fmulp ; st0 = fat*(i+1) 
-    fstp qword[fat] ; fat = st0
-    fstp 
-
-    fld qword[divisor]
-    fld qword[m1]
-    fdivrp ;temos st0 = st0/st1 com st0/st1 == 1 / (i*2 + 1)!]
-    fstp qword[divisor] ; divisor = st0
-    fstp        
-
-    fld qword[divisor]
-    fld qword[CurrentOp]
-    fmulp;      temos st0 = st0*st1 com st0*st1 == (-1)^i * [1/(2*i +1)!]
-    fstp qword[termo] ;termo = st0
-    fstp
-
-    fld qword[CurrentOp]
-    fld qword[minusone]
-    fmulp ; temos st0 = st0*st1 com st0* st1 == (-1)^(i+1) == (-1)*(-1)^i
-    fstp qword[CurrentOp]  ;CurrentOp = st0
-
-    fld qword[xpot]
-    fld qword[termo] 
-    fmulp ;st0 = st0*st1 com st0*st1 == xpot * (-1)^i * [1/(2*i +1)!]
-    fstp qword[termo] ; termo = st0
-    fstp
-
-    fld qword[termo]
-    fld qword[resultado]
-    faddp  ;st0 = st0 +st1 com st0+st1 = termo+resultado
-    fstp qword[resultado]  ;Soma o termo com o resultado
-    fstp
-
-    fld qword[i]
-    fld qword[m1]  
-    faddp   ;adiciono em 1 o i
-    fstp qword[i]
-    fstp
-
-    fld qword[xpot]
-    fld qword[xsq] 
-    fmulp  ; st0 = xpot * x^2
-    fstp qword[xpot] ; xpot = st0
-    fstp
-
-    fld qword[resultado]
+   
+    ; CÁLCULO DO ERRO ATUAL
     fld qword[resultadoReal]
+    fld qword[resultadoCalc]
     fsubp
     fabs
-
+ 
+    ; COMPARAÇÃO COM O ERRO SOLICITADO
     fld qword[erro]
     fcomip
-
-    fstp
-    fstp
-
-    inc ax ; Incrementa contador de iterações
-    jae exit1 ;	Jump if Above or Equal
-
-jmp loop1
-
+    fstp ; RETIRA VALORES COMPARADOS DA PILHA
+    fstp ; RETIRA VALORES COMPARADOS DA PILHA
+ 
+ 
+    jae exit1 ; CONDIÇÃO DE SAÍDA
+    inc eax ; incremento qt iterações
+ 
+    ; CÁLCULO FATOR MULTIPLICATIVO
+    fld qword[fatorMult]
+    fld qword[fatorNum]
+    fmulp               ; st0 := fatorMult*fatorNum
+    fild qword[indice]  ; st1 := indice, st0 := 1
+    fld1
+    faddp               ; st0 := indice+1
+    fist dword[indice]  ; indice := st0
+    fdivp               ; st1 = st1/st0 + pop st0
+    fild qword[indice]  ; st1 := indice, st0 := 1
+    fld1               
+    faddp               ; st0 := indice+1
+    fist dword[indice]  ; indice := st0
+    fdivp               ; st1 = st1/st0 + pop st0
+    fst qword[fatorMult]    ; guardar valor de fatorMult
+ 
+ 
+    ; SOMA DO FATOR MULT AO RESULTADO
+    fadd qword[resultadoCalc]   ; st0 += resultadoCalc
+    fstp qword[resultadoCalc]   ; resultadoCalc := st0
+ 
+ 
+    ; NOVA ITERAÇÃO
+    jmp loopIter
+ 
+ 
 exit1:
-
-    push dword [resultado+4]            ;empilhando o valor double
-    push dword [resultado]              ;em duas partes de 32 bits
-    push dword str                  ;empilhando endereco da string
-
-    call printf
-    add esp, 12
-
-    fld qword[resultado] ; carrego o resultado na FPU
-
+ 
+    fld qword[resultadoCalc]
+    fstp qword[varPrint]
+    call printar
+ 
     jmp FIM
-
-
+ 
+ 
 FIM:
-	mov eax, 1 ; exit syscall
-	mov ebx, 0 ; program return
-	int 80H ; syscall interruption
+    mov eax, 1 ; exit syscall
+    mov ebx, 0 ; program return
+    int 80h ; syscall interruption
