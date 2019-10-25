@@ -1,4 +1,8 @@
+extern printf
 section .data
+
+
+    string db 'Valor = %.12f', 10,0   ;string para printf
 
  
     ; Auxiliar Debug
@@ -35,9 +39,15 @@ Sin:
     fld qword[ebp+8]
     fstp qword[x] ;Coloca da pilha para o x
 
-    fld qword[ebp+12]
-    fstp qword[erro] ;Coloca da pilha para o erro
 
+
+
+
+
+
+
+    fld qword[ebp+16]
+    fstp qword[erro] ;Coloca da pilha para o erro
 
 
 
@@ -130,10 +140,13 @@ loopIter:
  
 exit1:
 
-    mov ecx,[ebp +12]
+    mov ecx,[ebp +24]
+    fld qword[resultadoCalc] ;Pega o valor certo de resultadoCalc
     fst qword[ecx]; Armazena em x o valor certo
  
 
+
     leave ;Desfaz o que o enter faz
     ret
+
  
