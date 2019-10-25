@@ -1,2 +1,2 @@
 run:
-	nasm -f elf64 SIN.asm && gcc -o programa main.c SIN.o && ./programa
+	nasm -f elf SIN.asm && gcc -m32 -o  programa main.c SIN.o  && ./programa

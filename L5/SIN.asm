@@ -1,6 +1,5 @@
 section .data
- 
-    str: db 'Valor = %.12f', 10,0   ;string para printf
+
  
     ; Auxiliar Debug
     varPrint dq 0.0

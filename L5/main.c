@@ -11,10 +11,10 @@ float convertAng (int x){
 extern void Sin(double,double,double*);
 int main (){
     int  numIter=0;
-    double x,e,val=0;
+    double x=90.0,e=0.01,val=0;
 
     printf("Digite o ângulo, em graus, e a diferença máxima:");
-    scanf("%lf %lf", &x, &e);
+    
 
 
 
