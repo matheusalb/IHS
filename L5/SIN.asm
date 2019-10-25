@@ -143,6 +143,8 @@ exit1:
     mov ecx,[ebp +24]
     fld qword[resultadoCalc] ;Pega o valor certo de resultadoCalc
     fst qword[ecx]; Armazena em x o valor certo
+
+    
  
 
 
