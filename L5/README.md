@@ -1,7 +1,7 @@
-Esse projeto calcula pi/4 por meio de uma aproximação númerica.
+Esse projeto calcula sin(x) por meio de uma aproximação númerica baseado no erro digitado e o valor x passado.
 
 para executar, digite:
-nasm -f elf FPU.asm && gcc -m32 -o FPU FPU.o && ./FPU
+make run
 
 Esse projeto foi feito por:
     Daniel Rodrigues Perazzo (drp)
