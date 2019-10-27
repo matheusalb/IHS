@@ -1,9 +1,4 @@
-extern printf
 section .data
-
-
-    string db 'Valor = %.12f', 10,0   ;string para printf
-
  
     ; Auxiliar Debug
     varPrint dq 0.0
@@ -32,31 +27,18 @@ global Sin
  
  
 Sin:
-
+ 
     enter 0,0 ; Reajusta, salva ebp na pilha
     finit
-
+ 
     fld qword[ebp+8]
     fstp qword[x] ;Coloca da pilha para o x
-
-
-
-
-
-
-
-
+ 
     fld qword[ebp+16]
     fstp qword[erro] ;Coloca da pilha para o erro
-
-
-
  
     xor eax, eax ; Zera o ax, será usado como contador
-    inc ax ; Iteração Inicial
-
-    
- 
+    inc eax ; Iteração Inicial
  
     ; TRATAMENTO OVERFLOW: Ângulo truncado para 360
     fld qword[tratOver] ; st0 := 360
@@ -90,11 +72,11 @@ Sin:
  
  
     mov eax,0 ; Inicializa eax como 0
-
+ 
 loopIter:
+ 
 
-    inc eax ;incrementa eax
-
+ 
    
     ; CÁLCULO DO ERRO ATUAL
     fld qword[resultadoReal]
@@ -122,7 +104,7 @@ loopIter:
     fist dword[indice]  ; indice := st0
     fdivp               ; st1 = st1/st0 + pop st0
     fild qword[indice]  ; st1 := indice, st0 := 1
-    fld1               
+    fld1              
     faddp               ; st0 := indice+1
     fist dword[indice]  ; indice := st0
     fdivp               ; st1 = st1/st0 + pop st0
@@ -139,16 +121,10 @@ loopIter:
  
  
 exit1:
-
-    mov ecx,[ebp +24]
+ 
+    mov ecx,[ebp+24]
     fld qword[resultadoCalc] ;Pega o valor certo de resultadoCalc
     fst qword[ecx]; Armazena em x o valor certo
-
-    
  
-
-
     leave ;Desfaz o que o enter faz
     ret
-
- 
