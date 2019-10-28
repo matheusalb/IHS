@@ -78,20 +78,7 @@ loopIter:
 
  
    
-    ; CÁLCULO DO ERRO ATUAL
-    fld qword[resultadoReal]
-    fld qword[resultadoCalc]
-    fsubp
-    fabs
- 
-    ; COMPARAÇÃO COM O ERRO SOLICITADO
-    fld qword[erro]
-    fcomip
-    fstp ; RETIRA VALORES COMPARADOS DA PILHA
-    fstp ; RETIRA VALORES COMPARADOS DA PILHA
- 
- 
-    jae exit1 ; CONDIÇÃO DE SAÍDA
+    
     inc eax ; incremento qt iterações
  
     ; CÁLCULO FATOR MULTIPLICATIVO
@@ -114,6 +101,23 @@ loopIter:
     ; SOMA DO FATOR MULT AO RESULTADO
     fadd qword[resultadoCalc]   ; st0 += resultadoCalc
     fstp qword[resultadoCalc]   ; resultadoCalc := st0
+
+
+
+    ; CÁLCULO DO ERRO ATUAL
+    fld qword[resultadoReal]
+    fld qword[resultadoCalc]
+    fsubp
+    fabs
+ 
+    ; COMPARAÇÃO COM O ERRO SOLICITADO
+    fld qword[erro]
+    fcomip
+    fstp ; RETIRA VALORES COMPARADOS DA PILHA
+    fstp ; RETIRA VALORES COMPARADOS DA PILHA
+ 
+ 
+    jae exit1 ; CONDIÇÃO DE SAÍDA
  
  
     ; NOVA ITERAÇÃO
