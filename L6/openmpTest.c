@@ -1,37 +1,49 @@
-#include<stdio.h>
-#include<stdlib.h>
-int checaCirculo(double x,double y){ //Função que checa se tá no círculo
+#include <bits/stdc++.h>
+#include <omp.h>
 
-    if(x*x+y*y <= 1){
-        return 1; // Se for menor que 1, então retorna 1
-    }
-    else 
-        return 0; // Retorna 0
-    
+int getRandom() {
+    // Pega um ponto de retangulo de area 2 que envolve o círculo
+
+    double x = (double)rand()/(double)RAND_MAX;
+    double y = (double)rand()/(double)RAND_MAX; // Pega um ponto alestório
+
+    double val = pow(x,2.) + pow(y,2.); // Pega a distancia a origem
+
+    if( val <= 1.) //Verifica se esta é menor ou igual a 1
+        return 1;
+    else
+        return 0;
 }
 
 
-int main(){
+int main() {
+
 
     int N;
+    double somatorio = 0;
+
     printf("digite o N necessario\n"); //Pega o N
     scanf("%d",&N);
 
-    
-    double HFinal=0;
-    double soma = 0;// Declara a soma e a integral de H final
 
+    omp_lock_t lock;  
+    omp_init_lock(&lock); //Inicializa lock
 
-    #pragma omp parallel num_threads(N) reduction(+:soma)
+    #pragma omp parallel num_threads(N)  //Declara o numero de threads
     {
-        
-        printf("Hello %d \n",omp_get_thread_num());
-        double XAl = (double)rand() / (double)RAND_MAX ; 
-        double YAL = (double)rand() / (double)RAND_MAX ; //Pegando um ponto aleatório
-        soma += checaCirculo(XAl,YAL); //Função que pega o H
-    }
+        #pragma omp for nowait // Não espera
+             for(int i = 1; i < N; i++) {
 
-    
-    HFinal = (4*soma)/N; // Multiplica e divide por 
-    printf("%f e N = %d e soma = %f\n",HFinal,N,soma);
+                omp_set_lock(&lock); //Faz um lock para impedir que threads acessem um mesmo recurso compartilhado
+                somatorio += getRandom();
+                omp_unset_lock(&lock);
+
+            }
+
+    }
+    somatorio = 4.*somatorio/(double)N; // Executa a fórmula
+
+    std::cout << somatorio << std::endl; // Printa
+
+    return 0;
 }
