@@ -50,7 +50,8 @@ static int char_device_release(struct inode *inodep, struct file *filep) {
 
 static ssize_t char_device_read(struct file *filep, char *buf, size_t opt, loff_t *off) {
   printk(KERN_ALERT "altera_driver: read %d bytes\n", opt);
-    
+  
+  // send data from kernel space to user space
   switch(opt){
 		case BUTTONS:
 				if(copy_to_user(buf,buttons,sizeof(uint32_t))) return -1;
@@ -58,18 +59,17 @@ static ssize_t char_device_read(struct file *filep, char *buf, size_t opt, loff_
 		case SWITCHES:
 				if(copy_to_user(buf,switches,sizeof(uint32_t))) return -1;
 			break;
-		default:return -1;
+		default:
+				printk(KERN_ALERT "Invalid option for read()");
+				return -1;
 	}
 
   return sizeof(uint32_t);
 }
 
 static ssize_t char_device_write(struct file *filep, const char *buf, size_t opt, loff_t *off) {
-	printk(KERN_ALERT "altera_driver: write %d bytes\n", sizeof(uint32_t));
-	printk(KERN_ALERT "adress hexport pointer: %p \n" ,hex_right);
-	printk(KERN_ALERT "adress red_leds pointer: %p \n", red_leds);
-	printk(KERN_ALERT "adress display pointer: %p \n",hex_left);
 	
+	// get data from the user space to kernel space
 	switch(opt){
 		case HEX_RIGHT:
 				if(copy_from_user(hex_right,buf,2*sizeof(uint32_t))) return -1;
@@ -83,8 +83,11 @@ static ssize_t char_device_write(struct file *filep, const char *buf, size_t opt
 		case GREEN_LEDS:
 				if(copy_from_user(green_leds,buf,2*sizeof(uint32_t))) return -1;
 			break;
-		default:return -1;
+		default:
+				printk(KERN_ALERT "Invalid option for write()");
+			    return -1;
 	}
+
 	return sizeof(uint32_t);
 }
 
@@ -158,13 +161,13 @@ static int __init altera_driver_init(void) {
    if(t<0)
       printk(KERN_ALERT "altera_driver: error: cannot register char or pci.\n");
    else
-     printk(KERN_ALERT "altera_driver: char+pci drivers registered.\n");
+     printk(KERN_ALERT "altera_driver: char+pci drivers loaded.\n");
 
    return t;
 }
 
 static void __exit altera_driver_exit(void) {
-  printk(KERN_ALERT "Goodbye from de2i150_altera.\n");
+  printk(KERN_ALERT "de2i150_altera unloaded.\n");
 
   unregister_chrdev(MAJOR_NUMBER, "de2i150_altera");
   pci_unregister_driver(&pci_driver);
