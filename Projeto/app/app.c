@@ -35,6 +35,7 @@ void real_write(int debug,int dev,unsigned char * buffer,int opt){
 int main() {
   int i, j = 1, k;
   int ret = 0;
+  uint32_t op_num, ant;
 
   int dev = open("/dev/de2i150_altera", O_RDWR);
 
@@ -45,29 +46,27 @@ int main() {
   real_write(0,dev,&number,HEX_RIGHT);
 
   while(1){
-    // ret = read(dev,&numberSwitch,BUTTONS);
-    // if(ret == -1){ 
-    //   printf("deu erro na leitura\n");
-    //   break;
-    // }
-    
-    // printf("%d\n",numberSwitch);
-    // if(numberSwitch == 2){ 
-    //   real_write(0,dev,&onel,RED_LEDS);
-    //   break;
-    // }
 
-    ret = read(dev,&numberButton, SWITCHES);
-    if(ret == -1){ 
-      printf("deu erro na leitura\n");
-      break;
+    read(dev,&ant, BUTTONS);
+    numberButton = ant;
+    while(numberButton == ant) read(dev,&numberButton, BUTTONS);
+
+    if(numberButton == 7){
+      read(dev,&op_num, SWITCHES);
+      printf("Switches em : %d\n", op_num);
     }
 
-    printf("%d\n",numberButton);
-    if(numberButton == 2){ 
-      real_write(0,dev,&onel,RED_LEDS);
-      break;
-   }
+
+   //  if(ret == -1){ 
+   //    printf("deu erro na leitura\n");
+   //    break;
+   //  }
+
+   //  printf("%d\n",numberButton);
+   //  if(numberButton == 2){ 
+   //    real_write(0,dev,&onel,RED_LEDS);
+   //    break;
+   // }
 
   }
 
