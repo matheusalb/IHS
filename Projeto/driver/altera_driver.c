@@ -50,7 +50,7 @@ static int char_device_release(struct inode *inodep, struct file *filep) {
 
 static ssize_t char_device_read(struct file *filep, char *buf, size_t opt, loff_t *off) {
   printk(KERN_ALERT "altera_driver: read %d bytes\n", opt);
-  
+  //printk(KERN_ALERT "buttons = %c \n", (char*) *buttons);
   // send data from kernel space to user space
   switch(opt){
 		case BUTTONS:

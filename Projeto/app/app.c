@@ -10,7 +10,7 @@ uint32_t zero = 0x40404040;
 uint32_t zerol = 0;
 uint32_t onel = 1;
 uint32_t numberSwitch = 0;
-uint32_t numberButton = 15;
+uint32_t numberButton = 20;
 unsigned char hexdigit[] = {0x24, 0x79, 0x40, 0x40,
                             0x40, 0x40, 0x40, 0x40, 
                             0xFF, 0x40, 0x40, 0x40,
@@ -45,28 +45,30 @@ int main() {
   real_write(0,dev,&number,HEX_RIGHT);
 
   while(1){
-    ret = read(dev,&numberSwitch,SWITCHES);
-    if(ret == -1){ 
-      printf("deu erro na leitura\n");
-      break;
-    }
-    
-    printf("%d\n",numberSwitch);
-    if(numberSwitch == 2){ 
-      real_write(0,dev,&onel,RED_LEDS);
-      break;
-    }
-
-    // ret = read(dev,&numberButton,BUTTONS);
+    // ret = read(dev,&numberSwitch,BUTTONS);
     // if(ret == -1){ 
     //   printf("deu erro na leitura\n");
     //   break;
     // }
-    // if(numberButton == 11){ 
+    
+    // printf("%d\n",numberSwitch);
+    // if(numberSwitch == 2){ 
     //   real_write(0,dev,&onel,RED_LEDS);
     //   break;
     // }
-    // printf("%d\n",numberButton);
+
+    ret = read(dev,&numberButton, SWITCHES);
+    if(ret == -1){ 
+      printf("deu erro na leitura\n");
+      break;
+    }
+
+    printf("%d\n",numberButton);
+    if(numberButton == 2){ 
+      real_write(0,dev,&onel,RED_LEDS);
+      break;
+   }
+
   }
 
   
