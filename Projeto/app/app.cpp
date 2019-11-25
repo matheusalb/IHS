@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 //#include <random>
+
 #include <cmath>
 //#include "de150interface.h"
 using namespace std;
@@ -28,6 +29,16 @@ unsigned char hexdigit[] = {0x24, 0x79, 0x40, 0x40,
                             0x40, 0x40, 0x40, 0x40, 
                             0xFF, 0x40, 0x40, 0x40,
                             0xFF, 0x5E, 0x79, 0x71};
+
+void escrever7Seg(unsigned char numero, bool lado = 1) {
+  // lado == 1, hexa do lado esquerdo, lado == 0 direto;
+
+  int dev = open("/dev/de2i150_altera", O_RDWR);
+  write(dev, &numero, HEX_RIGHT);
+
+  close(dev);
+  return;
+}
 
 uint32_t lerSwitchComButton() {
   int i, j = 1, k;
@@ -100,7 +111,7 @@ void wait(void){
   return;
 }
 
-void real_write(int debug,int dev,unsigned char * buffer,int opt){
+void real_write(int debug,int dev,unsigned char* buffer,int opt){
   int ret;
   wait();
   ret = write(dev,buffer,opt);
@@ -283,9 +294,10 @@ int main(){
   //   printf("\nPress '1' to play again\n>> ");
   //   opt = (int) lerSwitchComButton();
   // }
-    int aa = lerButton();
-    printf("rtornou %d", aa);
 
+  int dev = open("/dev/de2i150_altera", O_RDWR);
+  real_write(0,dev,&hexdigit[8],HEX_RIGHT);
+  close(dev);
    
 
 
