@@ -7,12 +7,12 @@
 #include <stdio.h>
 #include <stdint.h>
 //#include <random>
-#include <allegro.h>
 #include <cmath>
+//#include "de150interface.h"
 using namespace std;
+//using namespace de150interface;
 
 const int tab_size = 3;
-
 // random_device rand_device;
 // mt19937 rand_engine(rand_device());
 
@@ -29,23 +29,7 @@ unsigned char hexdigit[] = {0x24, 0x79, 0x40, 0x40,
                             0xFF, 0x40, 0x40, 0x40,
                             0xFF, 0x5E, 0x79, 0x71};
 
-void wait(void){
-  int i;
-  for(i=0;i>-1;i++){
-  }
-  
-  return;
-}
-
-void real_write(int debug,int dev,unsigned char * buffer,int opt){
-  int ret;
-  wait();
-  ret = write(dev,buffer,opt);
-  ret = write(dev,buffer,opt);
-  if( ret != -1) printf("Escrita ok!\n");
-}
-
-uint32_t lerSwitch() {
+uint32_t lerSwitchComButton() {
   int i, j = 1, k;
   int ret = 0;
   uint32_t op_num, ant;
@@ -71,13 +55,58 @@ uint32_t lerSwitch() {
       cont = false;
     }
   }
-  
-  //real_write(0,dev,&zero,HEX_RIGHT);
-
   close(dev);
   return op_num;
 }
 
+// Retorna o id do butao (3, 2, 1, 0) na placa;
+int lerButton() {
+  int i, j = 1, k;
+  int ret = 0;
+  uint32_t op_num, ant;
+
+  int dev = open("/dev/de2i150_altera", O_RDWR);
+  bool count = true;
+
+
+  while(count){
+    ant = 15;
+    numberButton = ant;
+
+    while(numberButton == ant) read(dev, &numberButton, BUTTONS);
+
+    if(numberButton >= 0 && numberButton < 15){
+      printf("leu: %d\n", numberButton);
+      count = false;
+    }
+  }
+
+  close(dev);
+
+  if(numberButton == 7) return 3;
+  else if(numberButton == 11) return 2;
+  else if(numberButton == 13) return 1;
+  else if(numberButton == 14) return 0;
+  else return -1;
+}
+
+
+
+void wait(void){
+  int i;
+  for(i=0;i>-1;i++){
+  }
+  
+  return;
+}
+
+void real_write(int debug,int dev,unsigned char * buffer,int opt){
+  int ret;
+  wait();
+  ret = write(dev,buffer,opt);
+  ret = write(dev,buffer,opt);
+  if( ret != -1) printf("Escrita ok!\n");
+}
 
 
 string random_element(vector<string> &choices){
@@ -208,7 +237,7 @@ bool play(string state = initial_state(), int turn = 0){
     int nPossibleMoves = (int) pow(2, possibleMoves.size()-1);
     while(choice <= 0 || choice > nPossibleMoves){
       printf("\n>> ");
-      choice = (int) lerSwitch();  //scanf("%d",&choice);
+      choice = (int) lerSwitchComButton();  //scanf("%d",&choice);
     }
     printf("sai do while, choice = %d && nPossibleMoves = %d \n", choice, nPossibleMoves);
 
@@ -226,7 +255,7 @@ bool play(string state = initial_state(), int turn = 0){
     }
     printf("\n\nPress '1' to continue\n>> ");
     int opt;
-    opt = (int) lerSwitch();//scanf("%d",&opt);
+    opt = (int) lerSwitchComButton();//scanf("%d",&opt);
 
     string chosen = random_element(possibleMoves);
     bool erase = play(chosen, 0);
@@ -245,14 +274,20 @@ bool play(string state = initial_state(), int turn = 0){
 }
 
 int main(){
-  clean();
-  int opt;
-  printf("\nPress '1' to play\n>> ");
-  opt = (int) lerSwitch();//scanf("%d",&opt);
-  while(opt == 1){
-    play();
-    printf("\nPress '1' to play again\n>> ");
-    opt = (int) lerSwitch();
-  }
+  //  clean();
+  // int opt;
+  // printf("\nPress '1' to play\n>> ");
+  // opt = (int) lerSwitchComButton();//scanf("%d",&opt);
+  // while(opt == 1){
+  //   play();
+  //   printf("\nPress '1' to play again\n>> ");
+  //   opt = (int) lerSwitchComButton();
+  // }
+    int aa = lerButton();
+    printf("rtornou %d", aa);
+
+   
+
+
   return 0;
 }
