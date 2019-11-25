@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 //#include <random>
-#include <allegro.h>
+#include <allegro5/allegro.h>
 #include <cmath>
 using namespace std;
 
