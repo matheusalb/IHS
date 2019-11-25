@@ -1,11 +1,13 @@
 #include <cstdio>
 #include <string>
 #include <vector>
+#include <string>
 #include <map>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <sstream>
 //#include <random>
 
 #include <cmath>
@@ -20,15 +22,18 @@ const int tab_size = 3;
 enum OPS {HEX_RIGHT,HEX_LEFT,RED_LEDS,GREEN_LEDS,BUTTONS,SWITCHES};
 
 uint32_t number = 0x40794079;
+
 uint32_t zero = 0x40404040;
 uint32_t zerol = 0;
 uint32_t onel = 1;
 uint32_t numberSwitch = 0;
 uint32_t numberButton = 20;
-unsigned char hexdigit[] = {0x24, 0x79, 0x40, 0x40,
-                            0x40, 0x40, 0x40, 0x40, 
-                            0xFF, 0x40, 0x40, 0x40,
-                            0xFF, 0x5E, 0x79, 0x71};
+// unsigned char hexdigit[] = {0x24, 0x79, 0x40, 0x40,
+//                             0x40, 0x40, 0x40, 0x40, 
+//                             0xFF, 0x40, 0x40, 0x40,
+//                             0xFF, 0x5E, 0x79, 0x71};
+unsigned char numbersSeven[] = { ~0x3F, ~0x06, ~0x5B, ~0x4f, ~0x66, ~0x6d, ~0x7d, ~0x07, ~0x7f, ~0x6f};
+
 
 void escrever7Seg(unsigned char numero, bool lado = 1) {
   // lado == 1, hexa do lado esquerdo, lado == 0 direto;
@@ -111,7 +116,7 @@ void wait(void){
   return;
 }
 
-void real_write(int debug,int dev,unsigned char* buffer,int opt){
+void real_write(int debug,int dev,uint32_t* buffer,int opt){
   int ret;
   wait();
   ret = write(dev,buffer,opt);
@@ -284,6 +289,41 @@ bool play(string state = initial_state(), int turn = 0){
   }
 }
 
+//TODO: int to 7 seg display
+void writeNumberOn7SegmentDisplay(int number) {
+  int dev = open("/dev/de2i150_altera", O_RDWR);
+
+  int num1 = number / 1000;
+  int num2 = (number % 1000)/ 100;
+  int num3 = ((number % 1000) % 100) / 10;
+  int num4 = ((number % 1000) % 100) % 10;
+
+  uint32_t numero = (numbersSeven[num4] << 8) | numbersSeven[num3];
+  numero = (numero << 8) | numbersSeven[num2];
+  numero = (numero << 8) | numbersSeven[num1];
+  real_write(0,dev,&numero,HEX_RIGHT);
+  close(dev); 
+}
+
+void writeNumberOn7SegmentDisplay(string number) {
+    // to write in 7 display segment: concatenate bits from the rightmost to the leftmost
+    // num4 << num3 << num2 << num1
+    // no display [num1, num2, num3, num4]  
+    int dev = open("/dev/de2i150_altera", O_RDWR);
+    int num1 = number[0] - '0';
+    int num2 = number[1] - '0';
+    int num3 = number[2] - '0';
+    int num4 = number[3] - '0';
+    
+    uint32_t numero = (numbersSeven[num4] << 8) | numbersSeven[num3];
+    numero = (numero << 8) | numbersSeven[num2];
+    numero = (numero << 8) | numbersSeven[num1];
+
+    real_write(0,dev,&numero,HEX_RIGHT);
+      close(dev);
+   
+}
+
 int main(){
   //  clean();
   // int opt;
@@ -295,10 +335,16 @@ int main(){
   //   opt = (int) lerSwitchComButton();
   // }
 
-  int dev = open("/dev/de2i150_altera", O_RDWR);
-  real_write(0,dev,&hexdigit[8],HEX_RIGHT);
-  close(dev);
-   
+  ;
+
+  uint32_t numero = (numbersSeven[1] << 8) | numbersSeven[0];
+  numero = (numero << 8) | numbersSeven[0];
+  numero = (numero << 8) | numbersSeven[0];
+  //for( int i= 0; i< 4; i++)
+  
+  writeNumberOn7SegmentDisplay(3456);
+  //real_write(0,dev,&numero,HEX_RIGHT);
+
 
 
   return 0;
