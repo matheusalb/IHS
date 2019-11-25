@@ -22,7 +22,7 @@ int main(void)
 
   // Flag que condicionará nosso looping
 	int sair = 0;
- 
+	
 	if (!al_init()){
 		fprintf(stderr, "Falha ao inicializar a Allegro.\n");
     	return -1;

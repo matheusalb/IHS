@@ -4,7 +4,8 @@
 #
 
 app: app.cpp
-	$(CXX) app.cpp -o app
+	g++ sprite.cpp -o hello $(pkg-config allegro-5 allegro_image-5 allegro_font-5 --libs --cflags)
+	# $(CXX) app.cpp -o app
 	# cp app /opt/tftp
 	
 clean:
