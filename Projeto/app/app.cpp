@@ -1,6 +1,6 @@
 // Os arquivos de cabeçalho
 #include <allegro5/allegro.h>
-
+#include <stdlib.h>
 #include <stdio.h>
 #include <vector> 
 #include <sstream>
@@ -48,7 +48,7 @@ int main(void)
 
 	int comida = 10;
 	int pos_com_x,pos_com_y;
-	bool comeu = false;
+	int comeu = 0;
 
 
 	vector<int> posicoes_x,posicoes_y;
@@ -65,14 +65,14 @@ int main(void)
  
 	if (!al_init()){
 		fprintf(stderr, "Falha ao inicializar a Allegro.\n");
-    	return -1;
-  	}
+    return -1;
+  }
  
 	janela = al_create_display(LARGURA_TELA, ALTURA_TELA);
 	if (!janela){
 
-	fprintf(stderr, "Falha ao criar janela.\n");
-	return -1;
+  	fprintf(stderr, "Falha ao criar janela.\n");
+  	return -1;
 	}
  
 	// Configura o título da janela
@@ -259,11 +259,21 @@ int main(void)
 
 				al_clear_to_color(al_map_rgb(0, 0, 0));
 
-				if(count <= comida){
-					posicoes_x.push_back(x);
-					posicoes_y.push_back(y);
-					
-				}
+				if(comeu || count==1){
+          posicoes_x.push_back(x);
+          posicoes_y.push_back(y);
+
+          int min_x = LARGURA_TELA/15,min_y = ALTURA_TELA/15;
+          int max_x = LARGURA_TELA - LARGURA_TELA/15,max_y = ALTURA_TELA - ALTURA_TELA/15; 
+
+          pos_com_x = (rand()%(max_x+1-min_x)) + min_x;
+          pos_com_y = (rand()%(max_y+1-min_y)) + min_y;
+
+          comeu = 0;
+
+
+          
+        }
 	
 				switch (tecla){
 				
@@ -342,26 +352,18 @@ int main(void)
 				al_set_target_bitmap(al_get_backbuffer(janela));
 				al_draw_bitmap(down_bound,0,ALTURA_TELA - ALTURA_TELA/15, 0);
 
-				// if(x>LARGURA_TELA-LARGURA_TELA/15||x<LARGURA_TELA/15) exit(0);
-				// if(y>ALTURA_TELA-ALTURA_TELA/15||y<ALTURA_TELA/15) exit(0);
+				if(x>LARGURA_TELA-LARGURA_TELA/15||x<LARGURA_TELA/15) exit(0);
+        if(y>ALTURA_TELA-ALTURA_TELA/15||y<ALTURA_TELA/15) exit(0);
 
 
-				
-				// for(int i = 1; i<posicoes_x.size();i++){
+        
+        for(int i = 1; i<posicoes_x.size()&&tecla!=0;i++){
 
-					
-				// 	if(x==posicoes_x[i]&&y==posicoes_y[i]&&count>comida) exit(0);
+          
+          if(x==posicoes_x[i]&&y==posicoes_y[i]&&count>comida) exit(0);
 
 
-				// }
-
-				if(count==1){
-          int max = LARGURA_TELA/15;
-          int min = LARGURA_TELA - LARGURA_TELA/15;
-
-					pos_com_x = (rand()%(max+1-min)) + min;
-					pos_com_y = (rand()%(max+1-min)) + min;
-				}
+        }
 
 				int c_x = (x + LARGURA_TELA/30);
 				int c_y = (y + ALTURA_TELA/30);
@@ -371,11 +373,11 @@ int main(void)
 				
 
 				if(x < c_com_x && x + LARGURA_TELA/15 >= c_com_x &&y < c_com_y && y + ALTURA_TELA/30 >= c_com_y){
-					comeu = true;
+					comeu = 1;
 
 
 				}
-				if(comeu){
+				if(!comeu){
 
 					al_set_target_bitmap(comida_im);
 					al_clear_to_color(al_map_rgb(0,0, 255));

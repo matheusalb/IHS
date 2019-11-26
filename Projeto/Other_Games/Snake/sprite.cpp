@@ -33,9 +33,7 @@ int main(void)
 
 	vector<int> posicoes_x,posicoes_y;
 
-<<<<<<< HEAD
-    printf("%x0 %x0",allegro_get_version());
-=======
+
 	std::random_device rd; // obtain a random number from hardware
     std::mt19937 eng(rd()); // seed the generator
     std::uniform_int_distribution<> distr_x(LARGURA_TELA/15, LARGURA_TELA -LARGURA_TELA/15); // define the range
@@ -44,7 +42,7 @@ int main(void)
 
 	
 
->>>>>>> 80e4ca75b59b253b5754e5daebbd2f8db682cc87
+
 
 
   // Flag que condicionará nosso looping
