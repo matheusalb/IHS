@@ -288,6 +288,16 @@ int main(void)
 
 				if(x>LARGURA_TELA-LARGURA_TELA/15||x<LARGURA_TELA/15) exit(0);
 				if(y>ALTURA_TELA-ALTURA_TELA/15||y<ALTURA_TELA/15) exit(0);
+				
+				for(int i = 1; i<posicoes_x.size();i++){
+
+
+					
+					if(x==posicoes_x[i]&&y==posicoes_y[i]&&count>comida) exit(0);
+
+
+
+				}
 
 
 
