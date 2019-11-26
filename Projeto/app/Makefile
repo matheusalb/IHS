@@ -4,7 +4,7 @@
 #
 
 app: app.cpp
-	$(CXX) app.cpp -o app
+	$(CXX) app.cpp -o app -lm -lallegro
 	# cp app /opt/tftp
 	
 clean:
