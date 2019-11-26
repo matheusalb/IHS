@@ -1,15 +1,16 @@
 // Os arquivos de cabeçalho
 #include <allegro5/allegro.h>
- 
-#include <stdio.h>
-#include <vector> 
+#include <random>
+#include<stdio.h>
+#include<vector> 
 
 // Atributos da tela
 const int LARGURA_TELA = 640;
 const int ALTURA_TELA = 480;
-const float FPS = 60;
+const float FPS = 20;
 
 using namespace std;
+
  
 int main(void)
 {
@@ -21,12 +22,29 @@ int main(void)
 	ALLEGRO_BITMAP* up_bound = NULL;
 	ALLEGRO_BITMAP* down_bound=NULL;
 	ALLEGRO_TIMER *timer = NULL;
+	ALLEGRO_BITMAP* comida_im = NULL;
+
+
 
 	int comida = 100;
+	int pos_com_x,pos_com_y;
+	bool comeu = false;
+
 
 	vector<int> posicoes_x,posicoes_y;
 
+<<<<<<< HEAD
     printf("%x0 %x0",allegro_get_version());
+=======
+	std::random_device rd; // obtain a random number from hardware
+    std::mt19937 eng(rd()); // seed the generator
+    std::uniform_int_distribution<> distr_x(LARGURA_TELA/15, LARGURA_TELA -LARGURA_TELA/15); // define the range
+
+    std::uniform_int_distribution<> distr_y(ALTURA_TELA/15, ALTURA_TELA -ALTURA_TELA/15); // define the range
+
+	
+
+>>>>>>> 80e4ca75b59b253b5754e5daebbd2f8db682cc87
 
 
   // Flag que condicionará nosso looping
@@ -45,7 +63,7 @@ int main(void)
 	}
  
 	// Configura o título da janela
-	al_set_window_title(janela, "Rotinas de Mouse - www.rafaeltoledo.net");
+	al_set_window_title(janela, "Snake10.1");
  
  
 
@@ -100,7 +118,19 @@ int main(void)
     	return -1;
 
 	}
- 
+	
+
+	// Alocamos o retângulo central da tela
+	comida_im = al_create_bitmap( (int)LARGURA_TELA/15,(int) ALTURA_TELA/15 );
+	if (!comida_im){
+
+    	fprintf(stderr, "Falha ao criar bitmap.\n");
+    	al_destroy_display(janela);
+    	return -1;
+
+	}
+
+
  
  	fila_eventos = al_create_event_queue();
 	if (!fila_eventos){
@@ -203,10 +233,16 @@ int main(void)
 
 				al_clear_to_color(al_map_rgb(0, 0, 0));
 
-				if(count <= comida){
-					printf("oi");
+				if(comeu || count==1){
 					posicoes_x.push_back(x);
 					posicoes_y.push_back(y);
+
+					pos_com_x = distr_x(eng);
+					pos_com_y = distr_y(eng);
+
+					comeu = false;
+
+
 					
 				}
 	
@@ -256,14 +292,13 @@ int main(void)
 
 
 				for(int i=0;i<posicoes_y.size();i++){
-					printf("osi");
 
 					al_set_target_bitmap(boneco);
 					al_clear_to_color(al_map_rgb(255, 0, 0));
 
 					al_set_target_bitmap(al_get_backbuffer(janela));
 					al_draw_bitmap(boneco, posicoes_x[i],posicoes_y[i], 0);
-					printf("%d\n",i);
+
 
 
 				}
@@ -290,16 +325,43 @@ int main(void)
 
 				if(x>LARGURA_TELA-LARGURA_TELA/15||x<LARGURA_TELA/15) exit(0);
 				if(y>ALTURA_TELA-ALTURA_TELA/15||y<ALTURA_TELA/15) exit(0);
+
+
 				
 				for(int i = 1; i<posicoes_x.size();i++){
-
 
 					
 					if(x==posicoes_x[i]&&y==posicoes_y[i]&&count>comida) exit(0);
 
 
+				}
+
+
+				int c_x = (x + LARGURA_TELA/30);
+				int c_y = (y + ALTURA_TELA/30);
+
+				int c_com_x = (pos_com_x + LARGURA_TELA/30);
+				int c_com_y = (pos_com_y + ALTURA_TELA/30);
+				
+
+				if(x < c_com_x && x + LARGURA_TELA/15 >= c_com_x &&y < c_com_y && y + ALTURA_TELA/30 >= c_com_y){
+					comeu = true;
+
 
 				}
+				if(!comeu){
+
+					al_set_target_bitmap(comida_im);
+					al_clear_to_color(al_map_rgb(0,0, 255));
+					al_set_target_bitmap(al_get_backbuffer(janela));
+					al_draw_bitmap(comida_im,pos_com_x,pos_com_y, 0);
+
+				}
+
+
+
+
+				
 
 
 
