@@ -1,23 +1,18 @@
-#include <cstdio>
-#include <string>
-#include <vector>
-#include <string>
-#include <map>
-#include <unistd.h>
-#include <fcntl.h>
+// Os arquivos de cabeçalho
+#include <allegro5/allegro.h>
+
 #include <stdio.h>
-#include <stdint.h>
+#include <vector> 
 #include <sstream>
-//#include <random>
+#include <stdint.h>
 
-#include <cmath>
-//#include "de150interface.h"
+
+// Atributos da tela
+const int LARGURA_TELA = 400;
+const int ALTURA_TELA = 250;
+const float FPS = 15;
+
 using namespace std;
-//using namespace de150interface;
-
-const int tab_size = 3;
-// random_device rand_device;
-// mt19937 rand_engine(rand_device());
 
 enum OPS {HEX_RIGHT,HEX_LEFT,RED_LEDS,GREEN_LEDS,BUTTONS,SWITCHES};
 
@@ -32,338 +27,400 @@ uint32_t numberButton = 20;
 //                             0x40, 0x40, 0x40, 0x40, 
 //                             0xFF, 0x40, 0x40, 0x40,
 //                             0xFF, 0x5E, 0x79, 0x71};
-unsigned char numbersSeven[] = { ~0x3F, ~0x06, ~0x5B, ~0x4f, ~0x66, ~0x6d, ~0x7d, ~0x07, ~0x7f, ~0x6f};
+//unsigned char numbersSeven[] = { ~0x3F, ~0x06, ~0x5B, ~0x4f, ~0x66, ~0x6d, ~0x7d, ~0x07, ~0x7f, ~0x6f};
 
 
-void escrever7Seg(unsigned char numero, bool lado = 1) {
-  // lado == 1, hexa do lado esquerdo, lado == 0 direto;
 
-  int dev = open("/dev/de2i150_altera", O_RDWR);
-  write(dev, &numero, HEX_RIGHT);
-
-  close(dev);
-  return;
-}
-
-uint32_t lerSwitchComButton() {
-  int i, j = 1, k;
-  int ret = 0;
-  uint32_t op_num, ant;
-
-  int dev = open("/dev/de2i150_altera", O_RDWR);
-
-  //printf("%d\n",dev);
-
-  // real_write(0,dev,&zerol,RED_LEDS);
-  // real_write(0,dev,&zerol,GREEN_LEDS);
-  // real_write(0,dev,&number,HEX_RIGHT);
-  bool cont = true;
-
-  while(cont){
-
-    read(dev,&ant, BUTTONS);
-    numberButton = ant;
-    while(numberButton == ant) read(dev,&numberButton, BUTTONS);
-
-    if(numberButton == 7){
-      read(dev,&op_num, SWITCHES);
-      printf("Switches em : %d\n", op_num);
-      cont = false;
-    }
-  }
-  close(dev);
-  return op_num;
-}
-
-// Retorna o id do butao (3, 2, 1, 0) na placa;
-int lerButton() {
-  int i, j = 1, k;
-  int ret = 0;
-  uint32_t op_num, ant;
-
-  int dev = open("/dev/de2i150_altera", O_RDWR);
-  bool count = true;
+ 
+int main(void)
+{
+	ALLEGRO_DISPLAY *janela = NULL;
+	ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
+	ALLEGRO_BITMAP* boneco = NULL;
+	ALLEGRO_BITMAP* left_bound = NULL;
+	ALLEGRO_BITMAP* right_bound = NULL;
+	ALLEGRO_BITMAP* up_bound = NULL;
+	ALLEGRO_BITMAP* down_bound=NULL;
+	ALLEGRO_TIMER *timer = NULL;
+	ALLEGRO_BITMAP* comida_im = NULL;
 
 
-  while(count){
-    ant = 15;
-    numberButton = ant;
 
-    while(numberButton == ant) read(dev, &numberButton, BUTTONS);
+	int comida = 100;
+	int pos_com_x,pos_com_y;
+	bool comeu = false;
 
-    if(numberButton >= 0 && numberButton < 15){
-      printf("leu: %d\n", numberButton);
-      count = false;
-    }
+
+	vector<int> posicoes_x,posicoes_y;
+
+	int dev = open("/dev/de2i150_altera", O_RDWR);
+  if(dev == -1){
+    printf("bugou\n");
+    return -1;
   }
 
-  close(dev);
 
-  if(numberButton == 7) return 3;
-  else if(numberButton == 11) return 2;
-  else if(numberButton == 13) return 1;
-  else if(numberButton == 14) return 0;
-  else return -1;
-}
+  // Flag que condicionará nosso looping
+	int sair = 0;
+ 
+	if (!al_init()){
+		fprintf(stderr, "Falha ao inicializar a Allegro.\n");
+    	return -1;
+  	}
+ 
+	janela = al_create_display(LARGURA_TELA, ALTURA_TELA);
+	if (!janela){
 
+	fprintf(stderr, "Falha ao criar janela.\n");
+	return -1;
+	}
+ 
+	// Configura o título da janela
+	al_set_window_title(janela, "Snake10.1");
+ 
+ 
 
+ 
+	// Alocamos o retângulo central da tela
+	boneco = al_create_bitmap( (int)LARGURA_TELA / 15,(int) ALTURA_TELA / 15);
+	if (!boneco){
 
-void wait(void){
-  int i;
-  for(i=0;i>-1;i++){
-  }
-  
-  return;
-}
+    	fprintf(stderr, "Falha ao criar bitmap.\n");
+    	al_destroy_display(janela);
+    	return -1;
 
-void real_write(int debug,int dev,uint32_t* buffer,int opt){
-  int ret;
-  wait();
-  ret = write(dev,buffer,opt);
-  ret = write(dev,buffer,opt);
-  if( ret != -1) printf("Escrita ok!\n");
-}
-
-
-string random_element(vector<string> &choices){
-  // uniform_int_distribution<int> dist(0, choices.size()-1);
-  // return choices[dist(rand_engine)];
-  return choices[0];
-}
-
-map<string, vector<string> > learned;
-
-void clean(){
-  for(int i=0; i<80; i++){
-    printf("\n");
-  }
-}
-
-void print_field(string tab){
-  for(int i=0; i<tab_size*tab_size; i++){
-    if(i%tab_size == 0) printf("\n\t");
-    if(tab[i] == '0') printf("_");
-    else if(tab[i] == '1') printf("X");
-    else printf("O");
-  }
-  printf("\n");
-}
-
-vector<string> learn_state(string state, int turn){
-  vector<string> answer;
-  string to;
-
-  if(turn == 0){
-    for(int i=tab_size; i<tab_size*tab_size; i++){
-      if(state[i] == '1' && state[i-tab_size] == '0'){
-        to = state;
-        swap(to[i-tab_size], to[i]);
-        answer.push_back(to);
-      }
-      if(i%tab_size >= 1 && state[i] == '1' && state[i-tab_size-1] == '2'){
-        to = state;
-        to[i] = '0';
-        to[i-tab_size-1] = '1';
-        answer.push_back(to);
-      }
-      if(i%tab_size <= 1 && state[i] == '1' && state[i-tab_size+1] == '2'){
-        to = state;
-        to[i] = '0';
-        to[i-tab_size+1] = '1';
-        answer.push_back(to);
-      }
-    }
-  }
-  else{
-    for(int i=0; i<tab_size*(tab_size-1); i++){
-      if(state[i] == '2' && state[i+tab_size] == '0'){
-        to = state;
-        swap(to[i], to[i+tab_size]);
-        answer.push_back(to);
-      }
-      if(i%tab_size >= 1 && state[i] == '2' && state[i+tab_size-1] == '1'){
-        to = state;
-        to[i] = '0';
-        to[i+tab_size-1] = '2';
-        answer.push_back(to);
-      }
-      if(i%tab_size <= tab_size-2 && state[i] == '2' && state[i+tab_size+1] == '1'){
-        to = state;
-        to[i] = '0';
-        to[i+tab_size+1] = '2';
-        answer.push_back(to);
-      }
-    }
-  }
-
-  return answer;
-}
-
-vector<string> remove_element(string target, vector<string> from){
-  for(int i=0; i<from.size(); i++){
-    if(from[i] == target){
-      swap(from[i], from.back());
-      break;
-    }
-  }
-  from.pop_back();
-  return from;
-}
-
-bool is_final_state(string state){
-  for(int i=0; i<tab_size; i++) if(state[i] == '1') return 1;
-  for(int i=tab_size*(tab_size-1); i<tab_size*tab_size; i++) if(state[i] == '2') return 1;
-  return 0;
-}
-
-string initial_state(){
-  string answer = "";
-  for(int i=0; i<tab_size; i++) answer += "2";
-  for(int i=0; i<tab_size*(tab_size-2); i++) answer += "0";
-  for(int i=0; i<tab_size; i++) answer += "1";
-  return answer;
-}
-
-bool play(string state = initial_state(), int turn = 0){
-
-  clean();
-  printf("\nCurrent Field:\n");
-  print_field(state);
-
-  vector<string> possibleMoves = learn_state(state, turn);
-  if(is_final_state(state) || possibleMoves.size() == 0){
-    if(turn == 0){
-      printf("\nYou lost :(\n");
-      return 0;
-    }
-    else {
-      printf("\nYou Won :)\n");
-      return 1;
-    }
-  }
-
-  if(turn == 0){
-    printf("\nPossible Choices:\n");
-    for(int i=0; i<possibleMoves.size(); i++){
-      printf("\n%d:",i+1);
-      print_field(possibleMoves[i]);
-    }
-
-    int choice = 0;
-    int nPossibleMoves = (int) pow(2, possibleMoves.size()-1);
-    while(choice <= 0 || choice > nPossibleMoves){
-      printf("\n>> ");
-      choice = (int) lerSwitchComButton();  //scanf("%d",&choice);
-    }
-    printf("sai do while, choice = %d && nPossibleMoves = %d \n", choice, nPossibleMoves);
+	}
 
 
-    string chosen = possibleMoves[log2(choice)];
-    return play(chosen, 1);
-  }
-  else{
-    if(!learned.count(state)) learned[state] = possibleMoves;
-    else possibleMoves = learned[state];
+	// Alocamos o retângulo central da tela
+	left_bound = al_create_bitmap( (int)LARGURA_TELA / 15,(int) ALTURA_TELA );
+	if (!left_bound){
 
-    printf("\nMachine Deciding from...\n");
-    for(int i=0; i<possibleMoves.size(); i++){
-      print_field(possibleMoves[i]);
-    }
-    printf("\n\nPress '1' to continue\n>> ");
-    int opt;
-    opt = (int) lerSwitchComButton();//scanf("%d",&opt);
+    	fprintf(stderr, "Falha ao criar bitmap.\n");
+    	al_destroy_display(janela);
+    	return -1;
 
-    string chosen = random_element(possibleMoves);
-    bool erase = play(chosen, 0);
+	}
 
-    if(erase == 1 && possibleMoves.size() > 1){
-      printf("\nComputer learned not to go to\n");
-      print_field(chosen);
-      printf("\nafter\n");
-      print_field(state);
-      learned[state] = remove_element(chosen, possibleMoves);
-      erase = 0;
-    }
+	// Alocamos o retângulo central da tela
+	up_bound = al_create_bitmap( LARGURA_TELA,(int) ALTURA_TELA/15 );
+	if (!up_bound){
 
-    return erase;
-  }
-}
+    	fprintf(stderr, "Falha ao criar bitmap.\n");
+    	al_destroy_display(janela);
+    	return -1;
 
-//TODO: int to 7 seg display
-void writeNumberOn7SegmentDisplayRight(int number) {
-  int dev = open("/dev/de2i150_altera", O_RDWR);
+	}
 
-  int num1 = number / 1000;
-  int num2 = (number % 1000)/ 100;
-  int num3 = ((number % 1000) % 100) / 10;
-  int num4 = ((number % 1000) % 100) % 10;
+	// Alocamos o retângulo central da tela
+	right_bound = al_create_bitmap( (int)LARGURA_TELA / 15,(int) ALTURA_TELA );
+	if (!right_bound){
 
-  uint32_t numero = (numbersSeven[num4] << 8) | numbersSeven[num3];
-  numero = (numero << 8) | numbersSeven[num2];
-  numero = (numero << 8) | numbersSeven[num1];
-  real_write(0,dev,&numero,HEX_RIGHT);
-  close(dev); 
-}
+    	fprintf(stderr, "Falha ao criar bitmap.\n");
+    	al_destroy_display(janela);
+    	return -1;
 
-void writeNumberOn7SegmentDisplayRight(string number) {
-    // to write in 7 display segment: concatenate bits from the rightmost to the leftmost
-    // num4 << num3 << num2 << num1
-    // no display [num1, num2, num3, num4]  
-    int dev = open("/dev/de2i150_altera", O_RDWR);
-    int num1 = number[0] - '0';
-    int num2 = number[1] - '0';
-    int num3 = number[2] - '0';
-    int num4 = number[3] - '0';
+	}
+
+	// Alocamos o retângulo central da tela
+	down_bound = al_create_bitmap( (int)LARGURA_TELA,(int) ALTURA_TELA/15 );
+	if (!down_bound){
+
+    	fprintf(stderr, "Falha ao criar bitmap.\n");
+    	al_destroy_display(janela);
+    	return -1;
+
+	}
+	
+
+	// Alocamos o retângulo central da tela
+	comida_im = al_create_bitmap( (int)LARGURA_TELA/15,(int) ALTURA_TELA/15 );
+	if (!comida_im){
+
+    	fprintf(stderr, "Falha ao criar bitmap.\n");
+    	al_destroy_display(janela);
+    	return -1;
+
+	}
+
+
+ 
+ 	fila_eventos = al_create_event_queue();
+	if (!fila_eventos){
     
-    uint32_t numero = (numbersSeven[num4] << 8) | numbersSeven[num3];
-    numero = (numero << 8) | numbersSeven[num2];
-    numero = (numero << 8) | numbersSeven[num1];
+		fprintf(stderr, "Falha ao inicializar o fila de eventos.\n");
+    	al_destroy_display(janela);
+    	return -1;
+  	}
 
-    real_write(0,dev,&numero,HEX_RIGHT);
-      close(dev);
-   
-}
+	if (!al_install_keyboard()){
 
-void writeNumberOn7SegmentDisplayLeft(int numberLeft, int numberRight){
-  // Números de dois digitos cada, pfvr obg, é oq da na placa
-  int dev = open("/dev/de2i150_altera", O_RDWR);
+    	fprintf(stderr, "Falha ao inicializar o teclado.\n");
+    	return false;
+	}
 
-  int num1 = numberLeft / 10;
-  int num2 = numberLeft % 10;
-  int num3 = numberRight % 10;
-  int num4 = numberRight / 10;
+	timer = al_create_timer(1.0 / FPS);
+	if(!timer) {
+      	fprintf(stderr, "failed to create timer!\n");
+      	return -1;
+   	}
 
-  uint32_t numero = (numbersSeven[num4] << 8) | numbersSeven[num3];
-  numero = (numero << 8) | numbersSeven[num2];
-  numero = (numero << 8) | numbersSeven[num1];
-  real_write(0,dev,&numero,HEX_LEFT);
-  close(dev); 
-}
+	al_register_event_source(fila_eventos, al_get_keyboard_event_source());
+	al_register_event_source(fila_eventos, al_get_display_event_source(janela));
+	al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
+ 
 
 
-int main(){
-  //  clean();
-  // int opt;
-  // printf("\nPress '1' to play\n>> ");
-  // opt = (int) lerSwitchComButton();//scanf("%d",&opt);
-  // while(opt == 1){
-  //   play();
-  //   printf("\nPress '1' to play again\n>> ");
-  //   opt = (int) lerSwitchComButton();
-  // }
+	int x=LARGURA_TELA / 2,y=ALTURA_TELA / 2;
+	//int tecla = 0;
 
-  ;
+	// Set to black background
+	al_clear_to_color(al_map_rgb(0, 0, 0));
 
-  uint32_t numero = (numbersSeven[1] << 8) | numbersSeven[0];
-  numero = (numero << 8) | numbersSeven[0];
-  numero = (numero << 8) | numbersSeven[0];
-  //for( int i= 0; i< 4; i++)
+	// Draw red shape
+	al_set_target_bitmap(boneco);
+	al_clear_to_color(al_map_rgb(255, 0, 0));
+	al_set_target_bitmap(al_get_backbuffer(janela));
+	al_draw_bitmap(boneco, x,y, 0);
+	
+
+	al_start_timer(timer);
+ 
+
+
+
+	al_flip_display();
+
+
+	int count = 0;
+	uint32_t tecla = 0;
+	while (!sair){
+		  
+      read(dev, &tecla, BUTTONS);
+      read(dev, &tecla, BUTTONS);
+
+      printf("tecla == %d \n", tecla);
+    	while(!al_is_event_queue_empty(fila_eventos) || (tecla < 15 && tecla > 0) ){
+        
+			
+			ALLEGRO_EVENT evento;
+        	al_wait_for_event(fila_eventos, &evento);
+
+        	if (/*evento.type == ALLEGRO_EVENT_KEY_DOWN*/
+        		tecla < 15 && tecla > 0 ){
+
+
+            	switch (/*evento.keyboard.keycode*/
+            			tecla){
+            		
+					case /*ALLEGRO_KEY_UP*/ 7:
+						if(tecla!=2)
+              				tecla = 1;
+              		
+					break;
+            		
+					case /*ALLEGRO_KEY_DOWN*/ 11:
+              		
+					  	if(tecla!=1)
+					  		tecla = 2;
+
+              		break;
+            
+					case /*ALLEGRO_KEY_LEFT*/ 13:
+
+						if(tecla!=4)
+              				tecla = 3;
+
+              		break;
+            		
+					case /*ALLEGRO_KEY_RIGHT*/ 14:
+
+						if(tecla!=3)
+              				tecla = 4;
+              		break;
+            	}
+        	}
+
+
+        	
+			if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE){
+
+				sair = true;
+        	
+			}
+			if(evento.type == ALLEGRO_EVENT_TIMER){
+				count++;
+
+				al_clear_to_color(al_map_rgb(0, 0, 0));
+
+				if(count <= comida){
+					posicoes_x.push_back(x);
+					posicoes_y.push_back(y);
+					
+				}
+	
+				switch (tecla){
+				
+					case 1:
+						
+						y-=5;
+
+					break;
+
+					case 2:
+						y+=5;
+
+					break;
+
+					case 3:
+						x-=5;
+
+					break;
+					
+					case 4:
+						x+=5;
+
+					break;
+				}
+				
+
+				for(int i =  posicoes_x.size()-1;i > 0;i--){
+
+					posicoes_y[i] = posicoes_y[i-1];
+					posicoes_x[i] = posicoes_x[i-1];
+
+
+				}
+
+				
+
+
+
+				posicoes_x[0] = x;
+				posicoes_y[0] = y;
+				
+
+				
+
+
+
+				for(int i=0;i<posicoes_y.size();i++){
+
+					al_set_target_bitmap(boneco);
+					al_clear_to_color(al_map_rgb(255, 0, 0));
+
+					al_set_target_bitmap(al_get_backbuffer(janela));
+					al_draw_bitmap(boneco, posicoes_x[i],posicoes_y[i], 0);
+
+
+
+				}
+				
+				al_set_target_bitmap(left_bound);
+				al_clear_to_color(al_map_rgb(0, 255, 0));
+				al_set_target_bitmap(al_get_backbuffer(janela));
+				al_draw_bitmap(left_bound, 0,0, 0);
+
+				al_set_target_bitmap(right_bound);
+				al_clear_to_color(al_map_rgb(0, 255, 0));
+				al_set_target_bitmap(al_get_backbuffer(janela));
+				al_draw_bitmap(right_bound, LARGURA_TELA-LARGURA_TELA/15,0, 0);
+
+				al_set_target_bitmap(up_bound);
+				al_clear_to_color(al_map_rgb(0, 255, 0));
+				al_set_target_bitmap(al_get_backbuffer(janela));
+				al_draw_bitmap(up_bound,0,0, 0);
+
+				al_set_target_bitmap(down_bound);
+				al_clear_to_color(al_map_rgb(0, 255, 0));
+				al_set_target_bitmap(al_get_backbuffer(janela));
+				al_draw_bitmap(down_bound,0,ALTURA_TELA - ALTURA_TELA/15, 0);
+
+				if(x>LARGURA_TELA-LARGURA_TELA/15||x<LARGURA_TELA/15) exit(0);
+				if(y>ALTURA_TELA-ALTURA_TELA/15||y<ALTURA_TELA/15) exit(0);
+
+
+				
+				for(int i = 1; i<posicoes_x.size();i++){
+
+					
+					if(x==posicoes_x[i]&&y==posicoes_y[i]&&count>comida) exit(0);
+
+
+				}
+
+				if(count==1){
+          int max = LARGURA_TELA/15;
+          int min = LARGURA_TELA - LARGURA_TELA/15;
+
+					pos_com_x = (rand()%(max+1-min)) + min;
+					pos_com_y = (rand()%(max+1-min)) + min;
+				}
+
+				int c_x = (x + LARGURA_TELA/30);
+				int c_y = (y + ALTURA_TELA/30);
+
+				int c_com_x = (pos_com_x + LARGURA_TELA/30);
+				int c_com_y = (pos_com_y + ALTURA_TELA/30);
+				
+
+				if(x < c_com_x && x + LARGURA_TELA/15 >= c_com_x &&y < c_com_y && y + ALTURA_TELA/30 >= c_com_y){
+					comeu = true;
+
+
+				}
+				if(comeu){
+
+					al_set_target_bitmap(comida_im);
+					al_clear_to_color(al_map_rgb(0,0, 255));
+					al_set_target_bitmap(al_get_backbuffer(janela));
+					al_draw_bitmap(comida_im,pos_com_x,pos_com_y, 0);
+
+				}
+
+
+
+
+				
+
+
+
+
+
+
+
+				
+
+				al_flip_display();
+				
+
+				
+				
+
+
+
+
+
+			}
+
+
+		}
+		
+			
+    		
+
+
+    
+
+    }
+
+    
+
+
+    
   
-  writeNumberOn7SegmentDisplayLeft(77,77);
-  writeNumberOn7SegmentDisplayRight(7734);
-  //real_write(0,dev,&numero,HEX_RIGHT);
-
-
-
+  close(dev);
+  // Desaloca os recursos utilizados na aplicação
+  al_destroy_bitmap(boneco);
   return 0;
 }
