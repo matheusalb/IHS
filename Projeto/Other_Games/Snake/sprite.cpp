@@ -343,7 +343,7 @@ int main(void)
 
 
 				}
-				if(comeu){
+				if(!comeu){
 
 					al_set_target_bitmap(comida_im);
 					al_clear_to_color(al_map_rgb(0,0, 255));
