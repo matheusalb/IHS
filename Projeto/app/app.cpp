@@ -290,7 +290,7 @@ bool play(string state = initial_state(), int turn = 0){
 }
 
 //TODO: int to 7 seg display
-void writeNumberOn7SegmentDisplay(int number) {
+void writeNumberOn7SegmentDisplayRight(int number) {
   int dev = open("/dev/de2i150_altera", O_RDWR);
 
   int num1 = number / 1000;
@@ -305,7 +305,7 @@ void writeNumberOn7SegmentDisplay(int number) {
   close(dev); 
 }
 
-void writeNumberOn7SegmentDisplay(string number) {
+void writeNumberOn7SegmentDisplayRight(string number) {
     // to write in 7 display segment: concatenate bits from the rightmost to the leftmost
     // num4 << num3 << num2 << num1
     // no display [num1, num2, num3, num4]  
@@ -323,6 +323,23 @@ void writeNumberOn7SegmentDisplay(string number) {
       close(dev);
    
 }
+
+void writeNumberOn7SegmentDisplayLeft(int numberLeft, int numberRight){
+  // Números de dois digitos cada, pfvr obg, é oq da na placa
+  int dev = open("/dev/de2i150_altera", O_RDWR);
+
+  int num1 = numberLeft / 10;
+  int num2 = numberLeft % 10;
+  int num3 = numberRight % 10;
+  int num4 = numberRight / 10;
+
+  uint32_t numero = (numbersSeven[num4] << 8) | numbersSeven[num3];
+  numero = (numero << 8) | numbersSeven[num2];
+  numero = (numero << 8) | numbersSeven[num1];
+  real_write(0,dev,&numero,HEX_LEFT);
+  close(dev); 
+}
+
 
 int main(){
   //  clean();
@@ -342,7 +359,8 @@ int main(){
   numero = (numero << 8) | numbersSeven[0];
   //for( int i= 0; i< 4; i++)
   
-  writeNumberOn7SegmentDisplay(3456);
+  writeNumberOn7SegmentDisplayLeft(77,77);
+  writeNumberOn7SegmentDisplayRight(7734);
   //real_write(0,dev,&numero,HEX_RIGHT);
 
 
