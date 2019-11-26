@@ -13,4 +13,4 @@ cd app
 
 make clean
 make app
-./app
+sudo ./app

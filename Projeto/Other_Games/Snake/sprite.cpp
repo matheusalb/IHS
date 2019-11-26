@@ -26,6 +26,8 @@ int main(void)
 
 	vector<int> posicoes_x,posicoes_y;
 
+    printf("%x0 %x0",allegro_get_version());
+
 
   // Flag que condicionará nosso looping
 	int sair = 0;
