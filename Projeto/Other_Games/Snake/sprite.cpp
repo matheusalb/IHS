@@ -229,9 +229,16 @@ int main(void)
 
 				al_clear_to_color(al_map_rgb(0, 0, 0));
 
-				if(count <= comida){
+				if(comeu || count==1){
 					posicoes_x.push_back(x);
 					posicoes_y.push_back(y);
+
+					pos_com_x = distr_x(eng);
+					pos_com_y = distr_y(eng);
+
+					comeu = false;
+
+
 					
 				}
 	
@@ -325,11 +332,6 @@ int main(void)
 
 				}
 
-				if(count==1){
-
-					pos_com_x = distr_x(eng);
-					pos_com_y = distr_y(eng);
-				}
 
 				int c_x = (x + LARGURA_TELA/30);
 				int c_y = (y + ALTURA_TELA/30);
