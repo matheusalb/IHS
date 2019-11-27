@@ -8,9 +8,20 @@ using namespace std;
 class De150
 {
 public:
+
     De150(string s)
     {
         cout << "hello, " << s << endl;
+        numbersSeven[0] = ~0x3F;
+        numbersSeven[1] = (uint32_t) ~0x06;
+        numbersSeven[2] = ~0x5B;
+        numbersSeven[3] = ~0x4f;
+        numbersSeven[4] = ~0x66;
+        numbersSeven[5] = ~0x6d;
+        numbersSeven[6] = ~0x7d;
+        numbersSeven[7] = ~0x07;
+        numbersSeven[8] = ~0x7f;
+        numbersSeven[9] = ~0x6f;
     }
 
     void printTest() {
@@ -75,81 +86,81 @@ public:
         writeDisplayRight(right);
     }
 
-    uint32_t readSwtichWithButton()
-    {
-        int i, j = 1, k;
-        int ret = 0;
-        uint32_t op_num, ant;
+    // uint32_t readSwtichWithButton()
+    // {
+    //     int i, j = 1, k;
+    //     int ret = 0;
+    //     uint32_t op_num, ant;
 
-        int dev = open("/dev/de2i150_altera", O_RDWR);
+    //     int dev = open("/dev/de2i150_altera", O_RDWR);
 
-        //printf("%d\n",dev);
+    //     //printf("%d\n",dev);
 
-        // real_write(0,dev,&zerol,RED_LEDS);
-        // real_write(0,dev,&zerol,GREEN_LEDS);
-        // real_write(0,dev,&number,HEX_RIGHT);
-        bool cont = true;
+    //     // real_write(0,dev,&zerol,RED_LEDS);
+    //     // real_write(0,dev,&zerol,GREEN_LEDS);
+    //     // real_write(0,dev,&number,HEX_RIGHT);
+    //     bool cont = true;
 
-        while (cont)
-        {
+    //     while (cont)
+    //     {
 
-            read(dev, &ant, BUTTONS);
-            numberButton = ant;
-            while (numberButton == ant)
-                read(dev, &numberButton, BUTTONS);
+    //         read(dev, &ant, BUTTONS);
+    //         numberButton = ant;
+    //         while (numberButton == ant)
+    //             read(dev, &numberButton, BUTTONS);
 
-            if (numberButton == 7)
-            {
-                read(dev, &op_num, SWITCHES);
-                printf("Switches em : %d\n", op_num);
-                cont = false;
-            }
-        }
-        close(dev);
-        return op_num;
-    }
+    //         if (numberButton == 7)
+    //         {
+    //             read(dev, &op_num, SWITCHES);
+    //             printf("Switches em : %d\n", op_num);
+    //             cont = false;
+    //         }
+    //     }
+    //     close(dev);
+    //     return op_num;
+    // }
 
-    // Retorna o id do butao (3, 2, 1, 0) na placa;
-    int readButton()
-    {
-        int i, j = 1, k;
-        int ret = 0;
-        uint32_t op_num, ant;
+    // // Retorna o id do butao (3, 2, 1, 0) na placa;
+    // int readButton()
+    // {
+    //     int i, j = 1, k;
+    //     int ret = 0;
+    //     uint32_t op_num, ant;
 
-        int dev = open("/dev/de2i150_altera", O_RDWR);
-        bool count = true;
+    //     int dev = open("/dev/de2i150_altera", O_RDWR);
+    //     bool count = true;
 
-        while (count)
-        {
-            ant = 15;
-            numberButton = ant;
+    //     while (count)
+    //     {
+    //         ant = 15;
+    //         numberButton = ant;
 
-            while (numberButton == ant)
-                read(dev, &numberButton, BUTTONS);
+    //         while (numberButton == ant)
+    //             read(dev, &numberButton, BUTTONS);
 
-            if (numberButton >= 0 && numberButton < 15)
-            {
-                printf("leu: %d\n", numberButton);
-                count = false;
-            }
-        }
+    //         if (numberButton >= 0 && numberButton < 15)
+    //         {
+    //             printf("leu: %d\n", numberButton);
+    //             count = false;
+    //         }
+    //     }
 
-        close(dev);
+    //     close(dev);
 
-        if (numberButton == 7)
-            return 3;
-        else if (numberButton == 11)
-            return 2;
-        else if (numberButton == 13)
-            return 1;
-        else if (numberButton == 14)
-            return 0;
-        else
-            return -1;
-    }
+    //     if (numberButton == 7)
+    //         return 3;
+    //     else if (numberButton == 11)
+    //         return 2;
+    //     else if (numberButton == 13)
+    //         return 1;
+    //     else if (numberButton == 14)
+    //         return 0;
+    //     else
+    //         return -1;
+    // }
 
 private:
-    char numbersSeven[10] = {~0x3F, ~0x06, ~0x5B, ~0x4f, ~0x66, ~0x6d, ~0x7d, ~0x07, ~0x7f, ~0x6f};
+    unsigned char numbersSeven[10];
     enum OPS
     {
         HEX_RIGHT,
@@ -160,8 +171,8 @@ private:
         SWITCHES
     };
 
-    uint32_t numberSwitch = 0;
-    uint32_t numberButton = 20;
+    // uint32_t numberSwitch = 0;
+    // uint32_t numberButton = 20;
 
     void real_write(int debug, int dev, uint32_t *buffer, int opt)
     {

@@ -5,7 +5,7 @@
 #include <vector> 
 #include <sstream>
 #include <stdint.h>
-
+#include "../lib/de150.cpp"
 
 // Atributos da tela
 const int LARGURA_TELA = 400;
@@ -27,13 +27,49 @@ uint32_t numberButton = 20;
 //                             0x40, 0x40, 0x40, 0x40, 
 //                             0xFF, 0x40, 0x40, 0x40,
 //                             0xFF, 0x5E, 0x79, 0x71};
-//unsigned char numbersSeven[] = { ~0x3F, ~0x06, ~0x5B, ~0x4f, ~0x66, ~0x6d, ~0x7d, ~0x07, ~0x7f, ~0x6f};
+unsigned char numbersSeven[] = { ~0x3F, ~0x06, ~0x5B, ~0x4f, ~0x66, ~0x6d, ~0x7d, ~0x07, ~0x7f, ~0x6f};
+void real_write(int debug, int dev, uint32_t *buffer, int opt)
+{
+    int ret;
+    // wait();
+    ret = write(dev, buffer, opt);
+    ret = write(dev, buffer, opt);
+    if (ret != -1)
+        printf("Escrita ok!\n");
+}
 
+
+void writeDisplayRight(int number)
+{
+    int dev = open("/dev/de2i150_altera", O_RDWR);
+
+    int num1 = number / 1000;
+    int num2 = (number % 1000) / 100;
+    int num3 = ((number % 1000) % 100) / 10;
+    int num4 = ((number % 1000) % 100) % 10;
+
+    uint32_t numero = (numbersSeven[num4] << 8) | numbersSeven[num3];
+    numero = (numero << 8) | numbersSeven[num2];
+    numero = (numero << 8) | numbersSeven[num1];
+    real_write(0, dev, &numero, HEX_RIGHT);
+    close(dev);
+}
 
 
  
 int main(void)
 {
+  // int de = open("/dev/de2i150_altera", O_RDWR);
+  // uint32_t numero = 0x40404040;
+  // real_write(0, de, &numero, HEX_RIGHT);
+  // close(de);
+  De150 de150("world!");
+  de150.writeDisplayRight(1234);
+  while (1) {
+
+  }
+
+
 	ALLEGRO_DISPLAY *janela = NULL;
 	ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
 	ALLEGRO_BITMAP* boneco = NULL;
