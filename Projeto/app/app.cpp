@@ -21,7 +21,7 @@
 
 
 // Atributos da tela
-const int LARGURA_TELA = 250;\
+const int LARGURA_TELA = 250;
 const int ALTURA_TELA = 250;
 const float FPS = 10;
 
@@ -37,7 +37,7 @@ uint32_t onel = 1;
 uint32_t numberSwitch = 0;
 uint32_t numberButton = 20;
  
-int main(void)
+int snake()
 {
   int tid;
   #pragma omp parallel num_threads(2) private(tid)  //Declara o numero de threads
@@ -59,7 +59,7 @@ int main(void)
 	ALLEGRO_BITMAP* left_bound = NULL;
 	ALLEGRO_BITMAP* right_bound = NULL;
 	ALLEGRO_BITMAP* up_bound = NULL;
-	ALLEGRO_BITMAP* down_bound=NULL;
+	ALLEGRO_BITMAP* down_bound = NULL;
 	ALLEGRO_TIMER *timer = NULL;
 	ALLEGRO_BITMAP* comida_im = NULL;
 
@@ -263,7 +263,7 @@ int main(void)
         
 			
 		  ALLEGRO_EVENT evento;
-      al_wait_for_event(fila_eventos, &evento);
+      	al_wait_for_event(fila_eventos, &evento);
 
 
         	
@@ -415,8 +415,9 @@ int main(void)
 
 			}
 
-		}
-  }
+		
+	}
+  	}
 
     
 

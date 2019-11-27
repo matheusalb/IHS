@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "../lib/de150.cpp"
 #include <allegro5/allegro_font.h>
+#include "app.cpp"
 #include <allegro5/allegro_ttf.h>
 
 // Atributos da tela
@@ -215,6 +216,8 @@ int main(void)
   al_destroy_bitmap(hexspawn);
   al_destroy_display(janela);
   al_destroy_event_queue(fila_eventos);
+
+  if(run_snake) snake();
  
   return 0;
 }
