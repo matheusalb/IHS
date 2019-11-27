@@ -269,27 +269,32 @@ int main(void)
 
           
         }
+
+        int cinco = 5;
 	
 				switch (tecla){
 				
 					case 1:
-						
-						y-=5;
+						//y-=5;
+            __asm__("subl %%ebx, %%eax;" : "=a" (y) : "a" (y) , "b" (cinco));
 
 					break;
 
 					case 2:
-						y+=5;
+          // y+=5;
+            __asm__("addl %%ebx, %%eax;" : "=a" (y) : "a" (cinco) , "b" (y));
 
 					break;
 
 					case 3:
-						x-=5;
+						//x-=5;
+          __asm__("subl %%ebx, %%eax;" : "=a" (x) : "a" (x) , "b" (cinco));
 
 					break;
 					
 					case 4:
-						x+=5;
+						//x+=5;
+            __asm__("addl %%ebx, %%eax;" : "=a" (x) : "a" (cinco) , "b" (x));
 
 					break;
 				}
