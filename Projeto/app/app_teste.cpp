@@ -360,13 +360,13 @@ int main(){
   numero = (numero << 8) | numbersSeven[0];
   //for( int i= 0; i< 4; i++)
   
-  writeNumberOn7SegmentDisplayLeft(77,77);
-  writeNumberOn7SegmentDisplayRight(7734);
+  // writeNumberOn7SegmentDisplayLeft(77,77);
+  // writeNumberOn7SegmentDisplayRight(7734);
   int ret = 0;
   printf("vai p loop\n");
   while(1){
 
-    read(dev, &numberButton, BUTTONS);
+    read(dev, &numberButton, SWITCHES);
     printf("leu: %d\n", numberButton);
   }
   //real_write(0,dev,&numero,HEX_RIGHT);
@@ -377,3 +377,32 @@ int main(){
   return 0;
 }
 
+// int lerButton() {
+//   int i, j = 1, k;
+//   int ret = 0;
+//   uint32_t op_num, ant;
+
+//   int dev = open("/dev/de2i150_altera", O_RDWR);
+//   bool count = true;
+
+
+//   while(count){
+//     ant = 15;
+//     numberButton = ant;
+
+//     while(numberButton == ant) read(dev, &numberButton, BUTTONS);
+
+//     if(numberButton >= 0 && numberButton < 15){
+//       printf("leu: %d\n", numberButton);
+//       count = false;
+//     }
+//   }
+
+//   close(dev);
+
+//   if(numberButton == 7) return 3;
+//   else if(numberButton == 11) return 2;
+//   else if(numberButton == 13) return 1;
+//   else if(numberButton == 14) return 0;
+//   else return -1;
+// }

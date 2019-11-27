@@ -23,51 +23,11 @@ uint32_t zerol = 0;
 uint32_t onel = 1;
 uint32_t numberSwitch = 0;
 uint32_t numberButton = 20;
-// unsigned char hexdigit[] = {0x24, 0x79, 0x40, 0x40,
-//                             0x40, 0x40, 0x40, 0x40, 
-//                             0xFF, 0x40, 0x40, 0x40,
-//                             0xFF, 0x5E, 0x79, 0x71};
-unsigned char numbersSeven[] = { ~0x3F, ~0x06, ~0x5B, ~0x4f, ~0x66, ~0x6d, ~0x7d, ~0x07, ~0x7f, ~0x6f};
-void real_write(int debug, int dev, uint32_t *buffer, int opt)
-{
-    int ret;
-    // wait();
-    ret = write(dev, buffer, opt);
-    ret = write(dev, buffer, opt);
-    if (ret != -1)
-        printf("Escrita ok!\n");
-}
-
-
-void writeDisplayRight(int number)
-{
-    int dev = open("/dev/de2i150_altera", O_RDWR);
-
-    int num1 = number / 1000;
-    int num2 = (number % 1000) / 100;
-    int num3 = ((number % 1000) % 100) / 10;
-    int num4 = ((number % 1000) % 100) % 10;
-
-    uint32_t numero = (numbersSeven[num4] << 8) | numbersSeven[num3];
-    numero = (numero << 8) | numbersSeven[num2];
-    numero = (numero << 8) | numbersSeven[num1];
-    real_write(0, dev, &numero, HEX_RIGHT);
-    close(dev);
-}
-
-
  
 int main(void)
 {
-  // int de = open("/dev/de2i150_altera", O_RDWR);
-  // uint32_t numero = 0x40404040;
-  // real_write(0, de, &numero, HEX_RIGHT);
-  // close(de);
   De150 de150("world!");
-  de150.writeDisplayRight(1234);
-  while (1) {
-
-  }
+  de150.writeDisplays(00, 00, 0000);
 
 
 	ALLEGRO_DISPLAY *janela = NULL;
@@ -82,18 +42,15 @@ int main(void)
 
 
 
-	int comida = 10;
+	int comida = 0;
 	int pos_com_x,pos_com_y;
 	int comeu = 0;
 
 
 	vector<int> posicoes_x,posicoes_y;
 
-	int dev = open("/dev/de2i150_altera", O_RDWR);
-  if(dev == -1){
-    printf("bugou\n");
-    return -1;
-  }
+	// int dev = open("/dev/de2i150_altera", O_RDWR);
+
 
 
   // Flag que condicionará nosso looping
@@ -113,8 +70,7 @@ int main(void)
  
 	// Configura o título da janela
 	al_set_window_title(janela, "Snake10.1");
- 
- 
+
 
  
 	// Alocamos o retângulo central da tela
@@ -232,9 +188,12 @@ int main(void)
   int tecla=0;
 	uint32_t tecla_apert = 0;
 	while (!sair){
-		  
-    read(dev, &tecla_apert, BUTTONS);
-    read(dev, &tecla_apert, BUTTONS);
+		
+    tecla_apert = de150.readButtonInput();
+    tecla_apert = de150.readButtonInput();
+
+    // read(dev, &tecla_apert, BUTTONS);
+    // read(dev, &tecla_apert, BUTTONS);
 
     printf("%d\n",tecla_apert);
 
@@ -410,6 +369,8 @@ int main(void)
 
 				if(x < c_com_x && x + LARGURA_TELA/15 >= c_com_x &&y < c_com_y && y + ALTURA_TELA/30 >= c_com_y){
 					comeu = 1;
+          comida++;
+          de150.writeDisplays(comida, 0, 0);
 
 
 				}
@@ -422,48 +383,20 @@ int main(void)
 
 				}
 
-
-
-
-				
-
-
-
-
-
-
-
-				
-
 				al_flip_display();
-				
-
-				
-				
-
-
-
-
 
 			}
 
-
 		}
-		
-			
-    		
-
-
-    
-
-    }
+  }
 
     
 
 
     
   
-  close(dev);
+  // close(dev);
+  de150.closeBoard();
   // Desaloca os recursos utilizados na aplicação
   al_destroy_bitmap(boneco);
   return 0;
