@@ -8,8 +8,20 @@
 #include "../lib/de150.cpp"
 #include <omp.h>
 
+#define KEY_0 14
+#define KEY_1 13
+#define KEY_2 11
+#define KEY_3 7
+
+#define UP_BUTTON 1
+#define DOWN_BUTTON 2
+#define LEFT_BUTTON 3
+#define RIGHT_BUTTON 4
+
+
+
 // Atributos da tela
-const int LARGURA_TELA = 400;\
+const int LARGURA_TELA = 250;\
 const int ALTURA_TELA = 250;
 const float FPS = 10;
 
@@ -214,32 +226,32 @@ int main(void)
 
       switch (tecla_apert){
                 
-        case 7:
+        case KEY_3:
                     
-          if(tecla!=2)
+          if(tecla!=RIGHT_BUTTON)
                   
-            tecla = 1;
-                  
+            tecla = LEFT_BUTTON;
+           
         break;
                 
-        case 11:
+        case KEY_2:
                   
-          if(tecla!=1)
-            tecla = 2;
+          if(tecla!=UP_BUTTON)
+            tecla = DOWN_BUTTON;
 
         break;
             
-        case  13:
+        case  KEY_1:
 
-          if(tecla!=4)
-            tecla = 3;
+          if(tecla!=DOWN_BUTTON)
+            tecla = UP_BUTTON;
 
         break;
                 
-        case  14:
+        case  KEY_0:
 
-          if(tecla!=3)
-            tecla = 4;
+          if(tecla!=LEFT_BUTTON)
+            tecla = RIGHT_BUTTON;
         break;
       }
 
@@ -285,27 +297,27 @@ int main(void)
 	
 				switch (tecla){
 				
-					case 1:
+					case UP_BUTTON:
 						//y-=5;
-            __asm__("subl %%ebx, %%eax;" : "=a" (y) : "a" (y) , "b" (cinco));
+            			__asm__("subl %%ebx, %%eax;" : "=a" (y) : "a" (y) , "b" (cinco));
 
 					break;
 
-					case 2:
-          // y+=5;
-            __asm__("addl %%ebx, %%eax;" : "=a" (y) : "a" (cinco) , "b" (y));
+					case DOWN_BUTTON:
+          				// y+=5;
+            			__asm__("addl %%ebx, %%eax;" : "=a" (y) : "a" (cinco) , "b" (y));
 
 					break;
 
-					case 3:
+					case LEFT_BUTTON:
 						//x-=5;
-          __asm__("subl %%ebx, %%eax;" : "=a" (x) : "a" (x) , "b" (cinco));
+          				__asm__("subl %%ebx, %%eax;" : "=a" (x) : "a" (x) , "b" (cinco));
 
 					break;
 					
-					case 4:
+					case RIGHT_BUTTON:
 						//x+=5;
-            __asm__("addl %%ebx, %%eax;" : "=a" (x) : "a" (cinco) , "b" (x));
+            			__asm__("addl %%ebx, %%eax;" : "=a" (x) : "a" (cinco) , "b" (x));
 
 					break;
 				}
