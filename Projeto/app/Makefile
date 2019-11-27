@@ -2,7 +2,7 @@ ALLEGRO_FLAG = $(shell pkg-config --cflags --libs allegro-5.0 allegro_acodec-5.0
 # CPPFLAGS += -std=c++0x 
 
 app:
-	g++ app.cpp $(CPPFLAGS) $(ALLEGRO_FLAG) -o app
+	g++ app.cpp -fopenmp $(CPPFLAGS) $(ALLEGRO_FLAG) -o app
 	echo "Main compilada"
 
 clean:

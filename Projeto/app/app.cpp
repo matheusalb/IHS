@@ -6,9 +6,10 @@
 #include <sstream>
 #include <stdint.h>
 #include "../lib/de150.cpp"
+#include <omp.h>
 
 // Atributos da tela
-const int LARGURA_TELA = 400;
+const int LARGURA_TELA = 400;\
 const int ALTURA_TELA = 250;
 const float FPS = 10;
 
@@ -26,6 +27,16 @@ uint32_t numberButton = 20;
  
 int main(void)
 {
+  int tid;
+  #pragma omp parallel num_threads(2) private(tid)  //Declara o numero de threads
+  {
+    tid = omp_get_thread_num();
+
+    if (tid == 0) {
+    system("python py-midi/py-midi.py");
+  }
+  else {
+  
   De150 de150("world!");
   de150.writeDisplays(00, 00, 0000);
 
@@ -58,14 +69,14 @@ int main(void)
  
 	if (!al_init()){
 		fprintf(stderr, "Falha ao inicializar a Allegro.\n");
-    return -1;
+    //return -1;
   }
  
 	janela = al_create_display(LARGURA_TELA, ALTURA_TELA);
 	if (!janela){
 
   	fprintf(stderr, "Falha ao criar janela.\n");
-  	return -1;
+  	//return -1;
 	}
  
 	// Configura o título da janela
@@ -79,7 +90,7 @@ int main(void)
 
     	fprintf(stderr, "Falha ao criar bitmap.\n");
     	al_destroy_display(janela);
-    	return -1;
+    	//return -1;
 
 	}
 
@@ -90,7 +101,7 @@ int main(void)
 
     	fprintf(stderr, "Falha ao criar bitmap.\n");
     	al_destroy_display(janela);
-    	return -1;
+    	//return -1;
 
 	}
 
@@ -100,7 +111,7 @@ int main(void)
 
     	fprintf(stderr, "Falha ao criar bitmap.\n");
     	al_destroy_display(janela);
-    	return -1;
+    	//return -1;
 
 	}
 
@@ -110,7 +121,7 @@ int main(void)
 
     	fprintf(stderr, "Falha ao criar bitmap.\n");
     	al_destroy_display(janela);
-    	return -1;
+    	//return -1;
 
 	}
 
@@ -120,7 +131,7 @@ int main(void)
 
     	fprintf(stderr, "Falha ao criar bitmap.\n");
     	al_destroy_display(janela);
-    	return -1;
+    	//return -1;
 
 	}
 	
@@ -131,7 +142,7 @@ int main(void)
 
     	fprintf(stderr, "Falha ao criar bitmap.\n");
     	al_destroy_display(janela);
-    	return -1;
+    	//return -1;
 
 	}
 
@@ -142,19 +153,19 @@ int main(void)
     
 		fprintf(stderr, "Falha ao inicializar o fila de eventos.\n");
     	al_destroy_display(janela);
-    	return -1;
+    	//return -1;
   	}
 
 	if (!al_install_keyboard()){
 
     	fprintf(stderr, "Falha ao inicializar o teclado.\n");
-    	return false;
+    	//return false;
 	}
 
 	timer = al_create_timer(1.0 / FPS);
 	if(!timer) {
       	fprintf(stderr, "failed to create timer!\n");
-      	return -1;
+      	//return -1;
    	}
 
 	al_register_event_source(fila_eventos, al_get_keyboard_event_source());
@@ -404,5 +415,8 @@ int main(void)
   de150.closeBoard();
   // Desaloca os recursos utilizados na aplicação
   al_destroy_bitmap(boneco);
+  system("sudo killall python");
+  }
+}
   return 0;
 }
