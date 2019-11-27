@@ -6,9 +6,11 @@
 #include <sstream>
 #include <stdint.h>
 #include "../lib/de150.cpp"
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 
 // Atributos da tela
-const int LARGURA_TELA = 400;\
+const int LARGURA_TELA = 400;
 const int ALTURA_TELA = 250;
 const float FPS = 10;
 
@@ -19,12 +21,23 @@ int main(void)
   ALLEGRO_DISPLAY *janela = NULL;
   ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
   ALLEGRO_BITMAP *snake = NULL, *hexspawn = 0;
+  ALLEGRO_FONT *fonte = NULL;
   // Flag que condicionará nosso looping
   int sair = 0;
  
   if (!al_init())
   {
     fprintf(stderr, "Falha ao inicializar a Allegro.\n");
+    return -1;
+  }
+
+  // Inicialização do add-on para uso de fontes
+  al_init_font_addon();
+
+  // Inicialização do add-on para uso de fontes True Type
+  if (!al_init_ttf_addon())
+  {
+    fprintf(stderr, "Falha ao inicializar add-on allegro_ttf.\n");
     return -1;
   }
  
@@ -36,7 +49,7 @@ int main(void)
   }
  
   // Configura o título da janela
-  al_set_window_title(janela, "Rotinas de Mouse - www.rafaeltoledo.net");
+  al_set_window_title(janela, "Menu - Projeto/IHS - 2019.2");
  
   // Torna apto o uso de mouse na aplicação
   if (!al_install_mouse())
@@ -53,6 +66,17 @@ int main(void)
     al_destroy_display(janela);
     return -1;
   }
+
+  fonte = al_load_font("arial_narrow_7.ttf", 100, 0);
+  if (!fonte)
+  {
+    al_destroy_display(janela);
+    fprintf(stderr, "Falha ao carregar fonte.\n");
+    return -1;
+  }
+  printf("fonte carregada\n");
+
+  al_draw_text(fonte, al_map_rgb(255, 255, 255), 100, 125, 0, "Hexapawn");
  
   // Alocamos o retângulo central da tela
   hexspawn = al_create_bitmap(100,50);
@@ -85,8 +109,11 @@ int main(void)
   al_register_event_source(fila_eventos, al_get_mouse_event_source());
  
   // Flag indicando se o mouse está sobre o retângulo central
-  int na_area_central = 0;
-  while (!sair)
+  int in_hexspawn = 0;
+  int in_snake = 0;
+  int run_snake = 0;
+  int run_hexspawn = 0;
+  while (1)
   {
     // Verificamos se há eventos na fila
     while (!al_is_event_queue_empty(fila_eventos))
@@ -98,29 +125,54 @@ int main(void)
       if (evento.type == ALLEGRO_EVENT_MOUSE_AXES)
       {
         // Verificamos se ele está sobre a região do retângulo central
-        if (evento.mouse.x >= LARGURA_TELA / 2 - al_get_bitmap_width(hexspawn) / 2 &&
-            evento.mouse.x <= LARGURA_TELA / 2 + al_get_bitmap_width(hexspawn) / 2 &&
-            evento.mouse.y >= ALTURA_TELA / 2 - al_get_bitmap_height(hexspawn) / 2 &&
-            evento.mouse.y <= ALTURA_TELA / 2 + al_get_bitmap_height(hexspawn) / 2)
+        if (evento.mouse.x >= 50 && evento.mouse.x <= 150 &&evento.mouse.y >= 100 &&
+            evento.mouse.y <= 150)
         {
-          na_area_central = 1;
+          in_hexspawn = 1;
         }
         else
         {
-          na_area_central = 0;
+          in_hexspawn = 0;
+        }
+        // Verificamos se ele está sobre a região do retângulo SNAKE
+        if (evento.mouse.x >= 250 && evento.mouse.x <= 350 && evento.mouse.y >= 100 &&
+            evento.mouse.y <= 150)
+        {
+          in_snake = 1;
+        }
+        else
+        {
+          in_snake = 0;
         }
       }
       // Ou se o evento foi um clique do mouse
       else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
       {
-        if (evento.mouse.x >= LARGURA_TELA - al_get_bitmap_width(snake) - 10 &&
-            evento.mouse.x <= LARGURA_TELA - 10 && evento.mouse.y <= ALTURA_TELA - 10 &&
-            evento.mouse.y >= ALTURA_TELA - al_get_bitmap_height(snake) - 10)
+        if (evento.mouse.x >= 250 && evento.mouse.x <= 350 && evento.mouse.y >= 100 &&
+            evento.mouse.y <= 150)
         {
-          sair = 1;
+          run_snake = 1;
+        }
+        if (evento.mouse.x >= 50 && evento.mouse.x <= 150 &&evento.mouse.y >= 100 &&
+            evento.mouse.y <= 150)
+        {
+          run_hexspawn = 1;
         }
       }
     }
+
+    if(run_snake == 1){
+    	//rodar a cobrinha
+    	printf("roda o snake\n");
+    	sleep(30);
+    	break;
+    }else if(run_hexspawn){
+    	//rodar hexswpawn
+    	printf("roda o hexspawn\n");
+    	sleep(30);
+    	break;
+    }
+
  
     // Limpamos a tela
     al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -128,29 +180,32 @@ int main(void)
     // Colorimos o bitmap correspondente ao retângulo central,
     // com a cor condicionada ao conteúdo da flag na_area_central
     al_set_target_bitmap(hexspawn);
-    if (!na_area_central)
+    if (!in_hexspawn)
     {
-      al_clear_to_color(al_map_rgb(255, 255, 255));
+      al_clear_to_color(al_map_rgb(55, 255, 55));
     }
     else
     {
-      al_clear_to_color(al_map_rgb(0, 255, 0));
+      al_clear_to_color(al_map_rgb(200, 255, 200));
     }
- 
-    // Colorimos o bitmap do botão de sair
+
     al_set_target_bitmap(snake);
-    al_clear_to_color(al_map_rgb(255, 0, 0));
+    if (!in_snake)
+    {
+      al_clear_to_color(al_map_rgb(55, 255, 55));
+    }
+    else
+    {
+      al_clear_to_color(al_map_rgb(200, 255, 200));
+    }
  
     // Desenhamos os retângulos na tela
     al_set_target_bitmap(al_get_backbuffer(janela));
 
-    //FUNCOES DE SETAR ONDE DESENHAR NA JANELA, OLHAR COM CARINHO :
-    /*
-    al_draw_bitmap(hexspawn, LARGURA_TELA / 2 - al_get_bitmap_width(area_central) / 2,
-        ALTURA_TELA / 2 - al_get_bitmap_height(area_central) / 2, 0);
-    al_draw_bitmap(botao_sair, LARGURA_TELA - al_get_bitmap_width(botao_sair) - 10,
-        ALTURA_TELA - al_get_bitmap_height(botao_sair) - 10, 0);
- 	*/
+
+    al_draw_bitmap(hexspawn, 50, 100, 0);
+    al_draw_bitmap(snake, 250, 100, 0);
+
     // Atualiza a tela
     al_flip_display();
   }
