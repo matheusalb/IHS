@@ -18,8 +18,6 @@
 #define LEFT_BUTTON 3
 #define RIGHT_BUTTON 4
 
-
-
 // Atributos da tela
 const int LARGURA_TELA = 250;\
 const int ALTURA_TELA = 250;

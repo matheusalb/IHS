@@ -147,20 +147,17 @@ public:
     }
 
     // Retorna o id do butao (3, 2, 1, 0) na placa;
-    int readButton()
-    {
-        int i, j = 1, k;
-        int ret = 0;
+    int readButton(){
+        int ret = -1;
         uint32_t op_num, ant;
 
         int dev = open("/dev/de2i150_altera", O_RDWR);
+        read(dev, &ant, BUTTONS);
         bool count = true;
 
-        while (count)
-        {
-            ant = 15;
-            numberButton = ant;
+        while (ret == -1){
 
+            numberButton = ant;
             while (numberButton == ant)
                 read(dev, &numberButton, BUTTONS);
 
@@ -169,20 +166,16 @@ public:
                 printf("leu: %d\n", numberButton);
                 count = false;
             }
+
+            if(numberButton == 7) ret = 0;
+            else if(numberButton == 11) ret = 1;
+            else if(numberButton == 13) ret = 2;
+            else if(numberButton == 14) ret = 3;
+            else ant = numberButton;
         }
 
         close(dev);
-
-        if (numberButton == 7)
-            return 3;
-        else if (numberButton == 11)
-            return 2;
-        else if (numberButton == 13)
-            return 1;
-        else if (numberButton == 14)
-            return 0;
-        else
-            return -1;
+        return ret;
     }
 
     uint32_t readButtonInput(){
