@@ -61,6 +61,10 @@ public:
         cout << "teste" << endl;
     }
 
+    void writeLED(uint32_t  numero) {
+        real_write(0, dev, &numero, GREEN_LEDS);
+    }
+
     void writeDisplayRight(int number)
     {
         int num1 = number / 1000;

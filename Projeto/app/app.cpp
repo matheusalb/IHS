@@ -25,6 +25,7 @@ const float FPS = 10;
 
 using namespace std;
 
+//asdas
 enum OPS {HEX_RIGHT,HEX_LEFT,RED_LEDS,GREEN_LEDS,BUTTONS,SWITCHES};
 
 uint32_t number = 0x40794079;
@@ -199,14 +200,25 @@ int main(void)
 
 	al_start_timer(timer);
  
-
-
+ 
+	uint32_t ledOn = 0;
+	de150.writeLED(ledOn);
+ 	uint32_t p = 0;
+	while(p != 1) {
+		p = de150.readSwtichWithButton();
+		printf("%d\n", p);
+	}
+	ledOn = 2;
+	de150.writeLED(ledOn);
+	sleep(1);
 
 	al_flip_display();
+	
 
+	
 
 	int count = 0;
-  int tecla=0;
+  	int tecla=0;
 	uint32_t tecla_apert = 0;
 	while (!sair){
 		
@@ -216,7 +228,7 @@ int main(void)
     // read(dev, &tecla_apert, BUTTONS);
     // read(dev, &tecla_apert, BUTTONS);
 
-    printf("%d\n",tecla_apert);
+    //printf("%d\n",tecla_apert);
 
 
 
@@ -373,15 +385,27 @@ int main(void)
 				al_set_target_bitmap(al_get_backbuffer(janela));
 				al_draw_bitmap(down_bound,0,ALTURA_TELA - ALTURA_TELA/15, 0);
 
-				if(x>LARGURA_TELA-LARGURA_TELA/15||x<LARGURA_TELA/15) exit(0);
-        if(y>ALTURA_TELA-ALTURA_TELA/15||y<ALTURA_TELA/15) exit(0);
+				if(x>LARGURA_TELA-LARGURA_TELA/15||x<LARGURA_TELA/15) {
+        	ledOn = 0;
+  			de150.writeLED(ledOn);
+        	exit(0);
+        }
+        if(y>ALTURA_TELA-ALTURA_TELA/15||y<ALTURA_TELA/15) {
+        	ledOn = 0;
+  			de150.writeLED(ledOn);
+        	exit(0);
+        }
 
 
         
         for(int i = 1; i<posicoes_x.size()&&tecla!=0;i++){
 
           
-          if(x==posicoes_x[i]&&y==posicoes_y[i]&&count>comida) exit(0);
+          if(x==posicoes_x[i]&&y==posicoes_y[i]&&count>comida){
+        	ledOn = 0;
+  			de150.writeLED(ledOn);
+        	exit(0);
+        }
 
 
         }
@@ -422,6 +446,8 @@ int main(void)
     
   
   // close(dev);
+  ledOn = 0;
+  de150.writeLED(ledOn);
   de150.closeBoard();
   // Desaloca os recursos utilizados na aplicação
   al_destroy_bitmap(boneco);

@@ -12,5 +12,5 @@ cd ..
 cd app
 
 make clean
-make app
-sudo ./app
+make app --always-make
+sudo ./snake

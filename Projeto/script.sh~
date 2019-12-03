@@ -11,5 +11,5 @@ mknod /dev/de2i150_altera c 91 1
 cd ..
 cd app
 
-make clean
-make
+make app --always-make
+sudo ./snake
