@@ -12,5 +12,8 @@ cd ..
 cd app
 
 make clean
-make app --always-make
+make snake --always-make
+make hexaPawn --always-make
+
+# Trocar pra hexaPawn caso deseje jogar ele ao invés da snake
 sudo ./snake
